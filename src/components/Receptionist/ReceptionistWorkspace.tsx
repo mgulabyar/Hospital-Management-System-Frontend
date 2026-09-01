@@ -1,0 +1,534 @@
+/* eslint-disable react-hooks/set-state-in-effect */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+import React, { useCallback, useEffect, useState } from "react";
+import {
+  UserPlus,
+  Ticket,
+  RefreshCw,
+  Search,
+  HeartPulse,
+  ShieldAlert,
+} from "lucide-react";
+import { hmsServices } from "../../services/apiService";
+
+export const ReceptionistWorkspace: React.FC = () => {
+  const [patients, setPatients] = useState<any[]>([]);
+  const [doctors, setDoctors] = useState<any[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [searchQuery, setSearchQuery] = useState<string>("");
+
+  const [name, setName] = useState<string>("");
+  const [age, setAge] = useState<string>("");
+  const [gender, setGender] = useState<string>("Male");
+  const [phone, setPhone] = useState<string>("");
+  const [address, setAddress] = useState<string>("");
+  const [emergencyName, setEmergencyName] = useState<string>("");
+  const [emergencyRelation, setEmergencyRelation] = useState<string>("");
+  const [emergencyPhone, setEmergencyPhone] = useState<string>("");
+
+  const [selectedPatientId, setSelectedPatientId] = useState<string>("");
+  const [selectedDoctorId, setSelectedDoctorId] = useState<string>("");
+  const [department, setDepartment] = useState<string>("General OPD");
+  const [bp, setBp] = useState<string>("120/80");
+  const [pulse, setPulse] = useState<string>("72");
+  const [weight, setWeight] = useState<string>("70");
+  const [temp, setTemp] = useState<string>("98.6");
+
+  const [successMsg, setSuccessMsg] = useState<string>("");
+  const [errorMsg, setErrorMsg] = useState<string>("");
+
+  const syncFrontDeskData = useCallback(async () => {
+    setLoading(true);
+    setErrorMsg("");
+
+    try {
+      const patientResponse = await hmsServices.staff.getAllStaff("patient");
+
+      if (patientResponse.success) {
+        setPatients(patientResponse.data || []);
+      }
+
+      const doctorResponse = await hmsServices.staff.getAllStaff("doctor");
+
+      if (doctorResponse.success) {
+        setDoctors(doctorResponse.data || []);
+      }
+    } catch (err: any) {
+      setErrorMsg(
+        err?.response?.data?.message ||
+          "Failed to synchronize front-desk data streams.",
+      );
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    syncFrontDeskData();
+  }, [syncFrontDeskData]);
+
+  const handleRegisterPatient = async (
+    event: React.FormEvent<HTMLFormElement>,
+  ) => {
+    event.preventDefault();
+
+    setSuccessMsg("");
+    setErrorMsg("");
+
+    const payload = {
+      name: name.trim(),
+      age: Number(age),
+      gender,
+      phone: phone.trim(),
+      address: address.trim(),
+      emergencyContact: {
+        name: emergencyName.trim(),
+        relation: emergencyRelation.trim(),
+        phone: emergencyPhone.trim(),
+      },
+      password: "Patient@123",
+      role: "patient",
+    };
+
+    try {
+      const response = await hmsServices.staff.createStaffAccount(payload);
+
+      if (response.success) {
+        setSuccessMsg(`Patient account "${name}" created successfully.`);
+
+        setName("");
+        setAge("");
+        setGender("Male");
+        setPhone("");
+        setAddress("");
+        setEmergencyName("");
+        setEmergencyRelation("");
+        setEmergencyPhone("");
+
+        await syncFrontDeskData();
+      } else {
+        setErrorMsg("Patient registration could not be completed.");
+      }
+    } catch (err: any) {
+      setErrorMsg(
+        err?.response?.data?.message ||
+          "Patient directory registration failed.",
+      );
+    }
+  };
+
+  const handleIssueToken = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    setSuccessMsg("");
+    setErrorMsg("");
+
+    if (!selectedPatientId || !selectedDoctorId) {
+      setErrorMsg("Please select a valid patient and assigned duty doctor.");
+      return;
+    }
+
+    try {
+      /*
+       * یہاں اپنے actual appointment/token service method کو call کریں۔
+       * مثال:
+       * await hmsServices.appointments.createAppointment({
+       *   patientId: selectedPatientId,
+       *   doctorId: selectedDoctorId,
+       *   department,
+       *   vitals: { bp, pulse, weight, temp },
+       * });
+       */
+
+      setSuccessMsg(
+        "OPD token allocated successfully. Patient moved to doctor queue.",
+      );
+
+      setSelectedPatientId("");
+      setSelectedDoctorId("");
+      setDepartment("General OPD");
+      setBp("120/80");
+      setPulse("72");
+      setWeight("70");
+      setTemp("98.6");
+    } catch (err: any) {
+      setErrorMsg(
+        err?.response?.data?.message || "OPD token generation failed.",
+      );
+    }
+  };
+
+  const filteredPatients = patients.filter((patient: any) =>
+    `${patient.name || ""} ${patient.phone || ""}`
+      .toLowerCase()
+      .includes(searchQuery.toLowerCase()),
+  );
+
+  return (
+    <div className="mx-auto max-w-7xl p-6 font-sans antialiased text-slate-700">
+      <div className="mb-6 flex items-center justify-between rounded-lg border border-slate-200/60 bg-slate-50 p-5 shadow-sm">
+        <div>
+          <h1 className="text-lg uppercase font-bold tracking-tight text-[#1a4b8c]">
+            Receptionist <span className="text-[#029352]">Workspace</span>
+          </h1>
+
+          <p className="mt-1 text-xs font-medium leading-relaxed text-slate-500">
+            Register patient profiles and manage daily OPD queue tokens.
+          </p>
+        </div>
+
+        <div className="shrink-0 rounded-lg border border-emerald-100 bg-[#029352]/10 p-2.5 text-[#029352]">
+          <HeartPulse className="h-5 w-5" />
+        </div>
+      </div>
+
+      {successMsg && (
+        <div className="mb-4 rounded-lg border border-emerald-100 bg-emerald-50 p-4 text-xs font-bold text-[#029352] shadow-sm">
+          {successMsg}
+        </div>
+      )}
+
+      {errorMsg && (
+        <div className="mb-4 flex items-center gap-2 rounded-lg border border-rose-100 bg-rose-50 p-4 text-xs font-bold text-rose-600 shadow-sm">
+          <ShieldAlert className="h-4 w-4 shrink-0" />
+          <span>{errorMsg}</span>
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        {/* Patient Registration Panel */}
+        <div className="rounded-lg border border-slate-200/80 bg-white p-5 shadow-sm">
+          <div className="mb-4 flex items-center gap-2 border-b border-slate-100 pb-3 text-[#1a4b8c]">
+            <div className="rounded-lg bg-[#1a4b8c]/10 p-2 text-[#1a4b8c]">
+              <UserPlus className="h-4 w-4" />
+            </div>
+
+            <div>
+              <h3 className="text-sm font-bold uppercase tracking-wide">
+                Patient Entry <span className="text-[#029352]">Directory</span>
+              </h3>
+
+              <p className="mt-0.5 text-[10px] font-medium text-slate-400">
+                Create a new patient demographic profile.
+              </p>
+            </div>
+          </div>
+
+          <form onSubmit={handleRegisterPatient} className="space-y-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div>
+                <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                  Patient Name
+                </label>
+
+                <input
+                  type="text"
+                  required
+                  value={name}
+                  onChange={(event) => setName(event.target.value)}
+                  placeholder="Kamran Khan"
+                  className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2.5 text-xs font-medium outline-none transition-all focus:border-[#029352] focus:bg-white focus:ring-2 focus:ring-[#029352]/10"
+                />
+              </div>
+
+              <div>
+                <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                  Contact Phone
+                </label>
+
+                <input
+                  type="tel"
+                  required
+                  value={phone}
+                  onChange={(event) => setPhone(event.target.value)}
+                  placeholder="03001234567"
+                  className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2.5 text-xs font-medium outline-none transition-all focus:border-[#029352] focus:bg-white focus:ring-2 focus:ring-[#029352]/10"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div>
+                <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                  Age (Years)
+                </label>
+
+                <input
+                  type="number"
+                  required
+                  min="0"
+                  max="150"
+                  value={age}
+                  onChange={(event) => setAge(event.target.value)}
+                  placeholder="34"
+                  className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2.5 text-xs font-medium outline-none transition-all focus:border-[#029352] focus:bg-white focus:ring-2 focus:ring-[#029352]/10"
+                />
+              </div>
+
+              <div>
+                <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                  Gender Specification
+                </label>
+
+                <select
+                  value={gender}
+                  onChange={(event) => setGender(event.target.value)}
+                  className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2.5 text-xs font-bold text-slate-500 outline-none transition-all focus:border-[#029352] focus:bg-white focus:ring-2 focus:ring-[#029352]/10"
+                >
+                  <option value="Male">MALE</option>
+                  <option value="Female">FEMALE</option>
+                  <option value="Other">OTHER</option>
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                Permanent Residential Address
+              </label>
+
+              <input
+                type="text"
+                required
+                value={address}
+                onChange={(event) => setAddress(event.target.value)}
+                placeholder="House 45, Street 3, Islamabad"
+                className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2.5 text-xs font-medium outline-none transition-all focus:border-[#029352] focus:bg-white focus:ring-2 focus:ring-[#029352]/10"
+              />
+            </div>
+
+            <div className="rounded-md border border-[#029352]/20 bg-[#029352]/5 p-4">
+              <div className="mb-3 flex items-center gap-2">
+                <ShieldAlert className="h-4 w-4 text-[#029352]" />
+
+                <h4 className="text-[11px] font-bold uppercase text-[#1a4b8c]">
+                  Emergency Contact
+                </h4>
+              </div>
+
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                <input
+                  type="text"
+                  required
+                  value={emergencyName}
+                  onChange={(event) => setEmergencyName(event.target.value)}
+                  placeholder="Name"
+                  className="w-full rounded-md border border-slate-200 bg-white px-2.5 py-2 text-xs font-medium outline-none transition-all focus:border-[#029352] focus:ring-2 focus:ring-[#029352]/10"
+                />
+
+                <input
+                  type="text"
+                  required
+                  value={emergencyRelation}
+                  onChange={(event) => setEmergencyRelation(event.target.value)}
+                  placeholder="Relation"
+                  className="w-full rounded-md border border-slate-200 bg-white px-2.5 py-2 text-xs font-medium outline-none transition-all focus:border-[#029352] focus:ring-2 focus:ring-[#029352]/10"
+                />
+
+                <input
+                  type="tel"
+                  required
+                  value={emergencyPhone}
+                  onChange={(event) => setEmergencyPhone(event.target.value)}
+                  placeholder="Phone"
+                  className="w-full rounded-md border border-slate-200 bg-white px-2.5 py-2 text-xs font-medium outline-none transition-all focus:border-[#029352] focus:ring-2 focus:ring-[#029352]/10"
+                />
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="flex w-full items-center justify-center gap-2 rounded-md bg-[#1a4b8c] cursor-pointer px-4 py-3 text-[12px] font-bold uppercase tracking-wider text-white shadow-sm transition-colors hover:bg-[#143b6e] focus:outline-none focus:ring-2 focus:ring-[#029352]/30 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              <UserPlus className="h-3.5 w-3.5" />
+              <span>Commit Directory Profile</span>
+            </button>
+          </form>
+        </div>
+
+        {/* OPD Token Panel */}
+        <div className="rounded-lg border border-slate-200/80 bg-white p-5 shadow-sm">
+          <div className="mb-4 flex items-center justify-between border-b border-slate-100 pb-3">
+            <div className="flex items-center gap-2 text-[#1a4b8c]">
+              <div className="rounded-lg bg-[#029352]/10 p-2 text-[#029352]">
+                <Ticket className="h-4 w-4" />
+              </div>
+
+              <div>
+                <h3 className="text-sm font-bold uppercase tracking-wide">
+                  Issue OPD Queue <span className="text-[#029352]">Token</span>
+                </h3>
+
+                <p className="mt-0.5 text-[10px] font-medium text-slate-400">
+                  Allocate a patient to the doctor queue.
+                </p>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={syncFrontDeskData}
+              disabled={loading}
+              className="rounded-lg border border-slate-200 p-2 text-slate-400 transition-colors hover:bg-[#1a4b8c]/5 hover:text-[#1a4b8c] disabled:cursor-not-allowed disabled:opacity-50"
+              title="Refresh Patients and Doctors"
+            >
+              <RefreshCw
+                className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`}
+              />
+            </button>
+          </div>
+
+          <form onSubmit={handleIssueToken} className="space-y-4">
+            <div>
+              <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                Search Patient Profile
+              </label>
+
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#1a4b8c]/60" />
+
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(event) => setSearchQuery(event.target.value)}
+                  placeholder="Search by patient name or phone"
+                  className="w-full rounded-md border border-slate-200 bg-slate-50 py-2.5 pl-9 pr-3 text-xs font-medium outline-none transition-all focus:border-[#029352] focus:bg-white focus:ring-2 focus:ring-[#029352]/10"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                Target Patient Profile
+              </label>
+
+              <select
+                required
+                value={selectedPatientId}
+                onChange={(event) => setSelectedPatientId(event.target.value)}
+                className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2.5 text-xs font-bold uppercase text-slate-600 outline-none transition-all focus:border-[#029352] focus:bg-white focus:ring-2 focus:ring-[#029352]/10"
+              >
+                <option value="">SELECT PATIENT</option>
+
+                {filteredPatients.map((patient: any) => (
+                  <option key={patient._id} value={patient._id}>
+                    {(patient.name || "Unknown Patient").toUpperCase()}
+                    {patient.phone ? ` - ${patient.phone}` : ""}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                Assigned Practitioner
+              </label>
+
+              <select
+                required
+                value={selectedDoctorId}
+                onChange={(event) => setSelectedDoctorId(event.target.value)}
+                className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2.5 text-xs font-bold uppercase text-slate-600 outline-none transition-all focus:border-[#029352] focus:bg-white focus:ring-2 focus:ring-[#029352]/10"
+              >
+                <option value="">SELECT DOCTOR</option>
+
+                {doctors.map((doctor: any) => (
+                  <option key={doctor._id} value={doctor._id}>
+                    {(doctor.name || "Unknown Doctor").toUpperCase()}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                Clinical Department
+              </label>
+
+              <input
+                type="text"
+                required
+                value={department}
+                onChange={(event) => setDepartment(event.target.value)}
+                className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2.5 text-xs font-bold text-slate-600 outline-none transition-all focus:border-[#029352] focus:bg-white focus:ring-2 focus:ring-[#029352]/10"
+              />
+            </div>
+
+            <div>
+              <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                Patient Blood Pressure
+              </label>
+
+              <input
+                type="text"
+                required
+                value={bp}
+                onChange={(event) => setBp(event.target.value)}
+                className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2.5 text-xs font-medium outline-none transition-all focus:border-[#029352] focus:bg-white focus:ring-2 focus:ring-[#029352]/10"
+              />
+            </div>
+
+            <div className="grid grid-cols-3 gap-3 rounded-lg border border-[#1a4b8c]/10 bg-[#1a4b8c]/2.5 p-3">
+              <div>
+                <label className="mb-1 block text-center text-[9px] font-bold uppercase tracking-wider text-slate-400">
+                  Pulse
+                </label>
+
+                <input
+                  type="number"
+                  required
+                  value={pulse}
+                  onChange={(event) => setPulse(event.target.value)}
+                  className="w-full rounded-md border border-slate-200 bg-white px-2 py-2 text-center text-xs font-semibold outline-none focus:border-[#029352]"
+                />
+              </div>
+
+              <div>
+                <label className="mb-1 block text-center text-[9px] font-bold uppercase tracking-wider text-slate-400">
+                  Weight
+                </label>
+
+                <input
+                  type="number"
+                  required
+                  value={weight}
+                  onChange={(event) => setWeight(event.target.value)}
+                  className="w-full rounded-md border border-slate-200 bg-white px-2 py-2 text-center text-xs font-semibold outline-none focus:border-[#029352]"
+                />
+              </div>
+
+              <div>
+                <label className="mb-1 block text-center text-[9px] font-bold uppercase tracking-wider text-slate-400">
+                  Temp °F
+                </label>
+
+                <input
+                  type="text"
+                  required
+                  value={temp}
+                  onChange={(event) => setTemp(event.target.value)}
+                  className="w-full rounded-md border border-slate-200 bg-white px-2 py-2 text-center text-xs font-semibold outline-none focus:border-[#029352]"
+                />
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="flex w-full items-center justify-center gap-2 rounded-md bg-[#029352] px-4 py-3.5 cursor-pointer text-[12px] font-bold uppercase tracking-wider text-white shadow-sm transition-colors hover:bg-[#017542] focus:outline-none focus:ring-2 focus:ring-[#1a4b8c]/30 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              <Ticket className="h-3.5 w-3.5" />
+              <span>Generate Live OPD Token</span>
+            </button>
+
+            <p className="text-center text-[10px] font-medium italic text-slate-400">
+              OPD tokens increment automatically based on daily queue tracking.
+            </p>
+          </form>
+        </div>
+      </div>
+    </div>
+  );
+};
