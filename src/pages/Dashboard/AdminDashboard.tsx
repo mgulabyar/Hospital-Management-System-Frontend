@@ -225,7 +225,6 @@ export const AdminDashboard: React.FC = () => {
           </div>
         </div>
 
-        {/* Security Log Summary */}
         <div className="group min-h-60 rounded-lg border border-slate-200/80 bg-white p-5 shadow-sm transition-all hover:border-[#029352]/30">
           <div className="mb-3 border-b border-slate-100 pb-2.5">
             <div className="flex items-center gap-2 text-[#029352]">
