@@ -1,6 +1,5 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-
 import React, { useCallback, useEffect, useState } from "react";
 import {
   UserPlus,
@@ -95,7 +94,7 @@ export const ReceptionistWorkspace: React.FC = () => {
 
       if (response.success && response.data) {
         setSuccessMsg(
-          `Success: Patient assigned official UHID ${response.data.patientId} inside server collections.`,
+          `Success: Patient assigned ${response.data.patientId} Successfully!`,
         );
 
         setName("");
@@ -172,7 +171,7 @@ export const ReceptionistWorkspace: React.FC = () => {
     <div className="mx-auto max-w-7xl p-6 font-sans antialiased text-slate-700">
       <div className="mb-6 flex items-center justify-between rounded-lg border border-slate-200/60 bg-slate-50 p-5 shadow-sm">
         <div>
-          <h1 className="text-xl  font-semibold tracking-tight text-[#1a4b8c]">
+          <h1 className="text-xl  font-bold tracking-tight text-[#1a4b8c]">
             Receptionist <span className="text-[#029352]">Workspace</span>
           </h1>
 
@@ -439,46 +438,45 @@ export const ReceptionistWorkspace: React.FC = () => {
               </div>
             </div>
 
-          <div className="font-sans antialiased">
-  <label className="mb-1 block text-[11px] font-bold uppercase tracking-wide text-slate-400 select-none">
-    Assigned Practitioner
-  </label>
+            <div className="font-sans antialiased">
+              <label className="mb-1 block text-[11px] font-bold uppercase tracking-wide text-slate-400 select-none">
+                Assigned Practitioner
+              </label>
 
-  <div className="relative w-full">
-    <select
-      required
-      value={selectedDoctorId}
-      onChange={(event) => setSelectedDoctorId(event.target.value)}
-      className="w-full cursor-pointer rounded-md border border-slate-200 bg-slate-50 pl-3 pr-10 py-2.5 text-xs font-bold uppercase text-slate-600 outline-none transition-all duration-200 focus:border-[#029352] focus:bg-white focus:ring-2 focus:ring-[#029352]/10 appearance-none shadow-sm"
-    >
-      <option value="">SELECT DOCTOR</option>
+              <div className="relative w-full">
+                <select
+                  required
+                  value={selectedDoctorId}
+                  onChange={(event) => setSelectedDoctorId(event.target.value)}
+                  className="w-full cursor-pointer rounded-md border border-slate-200 bg-slate-50 pl-3 pr-10 py-2.5 text-xs font-bold uppercase text-slate-600 outline-none transition-all duration-200 focus:border-[#029352] focus:bg-white focus:ring-2 focus:ring-[#029352]/10 appearance-none shadow-sm"
+                >
+                  <option value="">SELECT DOCTOR</option>
 
-      {doctors.map((doctor: any) => (
-        <option key={doctor._id} value={doctor._id}>
-          {(doctor.name || "Unknown Doctor").toUpperCase()}
-        </option>
-      ))}
-    </select>
+                  {doctors.map((doctor: any) => (
+                    <option key={doctor._id} value={doctor._id}>
+                      {(doctor.name || "Unknown Doctor").toUpperCase()}
+                    </option>
+                  ))}
+                </select>
 
-    {/* Exact synchronized vector arrow element overlay placed precisely at right-4 */}
-    <div className="absolute inset-y-0 right-2 flex items-center pointer-events-none text-slate-400">
-      <svg
-        className="w-4 h-4"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth="2.5"
-          d="M19 9l-7 7-7-7"
-        />
-      </svg>
-    </div>
-  </div>
-</div>
-
+                {/* Exact synchronized vector arrow element overlay placed precisely at right-4 */}
+                <div className="absolute inset-y-0 right-2 flex items-center pointer-events-none text-slate-400">
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2.5"
+                      d="M19 9l-7 7-7-7"
+                    />
+                  </svg>
+                </div>
+              </div>
+            </div>
 
             <div>
               <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-slate-400">
