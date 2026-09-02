@@ -144,7 +144,7 @@ export const DoctorWorkspace: React.FC = () => {
     <div className="mx-auto max-w-7xl p-6 font-sans antialiased text-slate-700">
       <div className="mb-6 flex items-center justify-between rounded-lg border border-slate-200/60 bg-slate-50 p-5 shadow-sm">
         <div>
-          <h1 className="text-xl font-semibold tracking-tight text-[#1a4b8c]">
+          <h1 className="text-xl font-bold tracking-tight text-[#1a4b8c]">
             Doctor <span className="text-[#029352]">Workspace</span>
           </h1>
 

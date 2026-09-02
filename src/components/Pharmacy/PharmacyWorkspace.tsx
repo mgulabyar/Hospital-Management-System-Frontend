@@ -265,6 +265,11 @@ export const PharmacyWorkspace: React.FC = () => {
                 {loading ? "Processing..." : "Commit Catalog Stock Level"}
               </span>
             </button>
+            <p className="text-center text-[10px] font-medium italic text-slate-400 mt-4">
+  Inventory system auto registers fresh medicine batches and updates 
+  catalog values matching threshold compliance logs.
+</p>
+
           </form>
         </div>
 

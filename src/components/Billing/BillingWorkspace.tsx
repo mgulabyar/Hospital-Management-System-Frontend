@@ -162,7 +162,7 @@ export const BillingWorkspace: React.FC = () => {
                 value={tokenId}
                 onChange={(event) => setTokenId(event.target.value)}
                 placeholder="e.g., 6a96f361c076977b5f8ede2b"
-                className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 font-mono text-xs text-slate-700 outline-none transition-all placeholder:text-slate-300 focus:border-[#1a4b8c] focus:bg-white focus:ring-2 focus:ring-[#1a4b8c]/10"
+                className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2.5 font-mono text-xs text-slate-700 outline-none transition-all placeholder:text-slate-300 focus:border-[#1a4b8c] focus:bg-white focus:ring-2 focus:ring-[#1a4b8c]/10"
               />
             </div>
 
@@ -177,7 +177,7 @@ export const BillingWorkspace: React.FC = () => {
                 value={patientId}
                 onChange={(event) => setPatientId(event.target.value)}
                 placeholder="e.g., 6a96f08826546ef46ef28276"
-                className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 font-mono text-xs text-slate-700 outline-none transition-all placeholder:text-slate-300 focus:border-[#1a4b8c] focus:bg-white focus:ring-2 focus:ring-[#1a4b8c]/10"
+                className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2.5 font-mono text-xs text-slate-700 outline-none transition-all placeholder:text-slate-300 focus:border-[#1a4b8c] focus:bg-white focus:ring-2 focus:ring-[#1a4b8c]/10"
               />
             </div>
 
@@ -192,14 +192,14 @@ export const BillingWorkspace: React.FC = () => {
                 value={medRecordId}
                 onChange={(event) => setMedRecordId(event.target.value)}
                 placeholder="e.g., 6a96f44ec076977b5f8ede2c"
-                className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 font-mono text-xs text-slate-700 outline-none transition-all placeholder:text-slate-300 focus:border-[#1a4b8c] focus:bg-white focus:ring-2 focus:ring-[#1a4b8c]/10"
+                className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2.5 font-mono text-xs text-slate-700 outline-none transition-all placeholder:text-slate-300 focus:border-[#1a4b8c] focus:bg-white focus:ring-2 focus:ring-[#1a4b8c]/10"
               />
             </div>
 
             <button
               type="submit"
               disabled={loading}
-              className="flex w-full min-h-9.5 items-center justify-center rounded-lg bg-[#1a4b8c] px-4 py-2.5 text-[10px] font-bold uppercase tracking-wider text-white shadow-sm transition-all hover:bg-[#133a69] focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
+              className="flex w-full min-h-9.5 items-center justify-center rounded-md cursor-pointer bg-[#1a4b8c] px-4 py-3 text-[11px] font-bold uppercase tracking-wider text-white shadow-sm transition-all hover:bg-[#133a69] focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
             >
               {loading ? (
                 <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
@@ -284,7 +284,7 @@ export const BillingWorkspace: React.FC = () => {
                   {/* Cash */}
                   <div
                     onClick={() => setPayMethod("Cash")}
-                    className={`flex cursor-pointer items-center justify-between rounded-xl border p-4 transition-all ${
+                    className={`flex cursor-pointer items-center justify-between rounded-md border p-3.5 transition-all ${
                       payMethod === "Cash"
                         ? "border-[#029352] bg-emerald-50/20"
                         : "border-slate-100 hover:border-slate-300"
@@ -320,7 +320,7 @@ export const BillingWorkspace: React.FC = () => {
                   {/* Card */}
                   <div
                     onClick={() => setPayMethod("Card")}
-                    className={`flex cursor-pointer items-center justify-between rounded-xl border p-4 transition-all ${
+                    className={`flex cursor-pointer items-center justify-between rounded-md border p-3.5 transition-all ${
                       payMethod === "Card"
                         ? "border-[#029352] bg-emerald-50/20"
                         : "border-slate-100 hover:border-slate-300"
@@ -358,7 +358,7 @@ export const BillingWorkspace: React.FC = () => {
               {/* Submit Button */}
               <button
                 type="submit"
-                className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#029352] px-4 py-2.5 text-[10px] font-bold uppercase tracking-wider text-white shadow-sm transition-colors hover:bg-[#017542] focus:outline-none focus:ring-2 focus:ring-[#1a4b8c]/30"
+                className="flex w-full items-center justify-center gap-2 rounded-md bg-[#029352] px-4 py-3.5 cursor-pointer text-[10px] font-bold uppercase tracking-wider text-white shadow-sm transition-colors hover:bg-[#017542] focus:outline-none focus:ring-2 focus:ring-[#1a4b8c]/30"
               >
                 <CheckCircle2 className="h-4 w-4" />
                 <span>Authorize Cash Settlement & Close Ledger</span>
