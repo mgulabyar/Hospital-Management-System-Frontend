@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+
 import React, { useEffect, useState } from "react";
 import {
   Users,
@@ -7,8 +8,12 @@ import {
   DollarSign,
   Building,
   AlertTriangle,
+  Terminal,
+  ActivitySquare,
+  Clock,
 } from "lucide-react";
 import { hmsServices } from "../../services/apiService";
+import { hmsReceptionServices } from "../../services/receptionService";
 import { MetricCard } from "../../components/UI/MetricCard";
 
 interface AnalyticsData {
@@ -18,26 +23,62 @@ interface AnalyticsData {
   netFinancialRevenueCollected: number;
 }
 
+interface SecurityLog {
+  id: string;
+  event: string;
+  user: string;
+  time: string;
+}
+
 export const AdminDashboard: React.FC = () => {
   const [metrics, setMetrics] = useState<AnalyticsData | null>(null);
+  const [liveQueue, setLiveQueue] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>("");
 
+  const securityLogs: SecurityLog[] = [
+    {
+      id: "SEC-402",
+      event: "User Overwrite Succeeded",
+      user: "admin@hospital.com",
+      time: "Just Now",
+    },
+    {
+      id: "SEC-401",
+      event: "OPD Token Issued #1",
+      user: "reception_desk",
+      time: "10 mins ago",
+    },
+    {
+      id: "SEC-400",
+      event: "EMR Record Committed",
+      user: "dr.shahzad",
+      time: "15 mins ago",
+    },
+  ];
+
   useEffect(() => {
-    const fetchDashboardAnalytics = async () => {
+    const fetchDashboardMasterData = async () => {
       try {
         setLoading(true);
         setError("");
-        const response = await hmsServices.billing.getDashboardAnalytics();
 
-        if (response.success && response.data) {
-          setMetrics(response.data);
-        } else {
-          setError("Failed to aggregate analytical parameters.");
+        const analyticsResponse =
+          await hmsServices.billing.getDashboardAnalytics();
+
+        if (analyticsResponse.success) {
+          setMetrics(analyticsResponse.data);
+        }
+
+        const queueResponse =
+          await hmsReceptionServices.getRegisteredPatients();
+
+        if (queueResponse.success) {
+          setLiveQueue(queueResponse.data.slice(0, 4));
         }
       } catch (err: any) {
         setError(
-          err.response?.data?.message ||
+          err?.response?.data?.message ||
             "Network error connecting to Express database pipeline.",
         );
       } finally {
@@ -45,24 +86,22 @@ export const AdminDashboard: React.FC = () => {
       }
     };
 
-    fetchDashboardAnalytics();
+    fetchDashboardMasterData();
   }, []);
 
-  // Professional Brand-Matched Loading Screen State
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[50vh]">
-        <div className="w-8 h-8 border-4 border-[#1a4b8c] border-t-transparent rounded-full animate-spin"></div>
+      <div className="flex min-h-[50vh] items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#1a4b8c] border-t-transparent" />
       </div>
     );
   }
 
-  // Consistent Error Notification Banner Block
   if (error) {
     return (
-      <div className="p-6 max-w-7xl mx-auto font-sans antialiased">
-        <div className="bg-rose-50 border border-rose-100 rounded-lg p-4 flex items-center gap-3 text-sm text-rose-600 font-semibold shadow-sm">
-          <AlertTriangle className="w-5 h-5 shrink-0" />
+      <div className="mx-auto max-w-7xl p-6 font-sans antialiased">
+        <div className="flex items-center gap-3 rounded-lg border border-rose-100 bg-rose-50 p-4 text-sm font-semibold text-rose-600 shadow-sm">
+          <AlertTriangle className="h-5 w-5 shrink-0" />
           <span>{error}</span>
         </div>
       </div>
@@ -70,23 +109,25 @@ export const AdminDashboard: React.FC = () => {
   }
 
   return (
-    <div className="p-6 font-sans max-w-7xl mx-auto antialiased select-none bg-white">
-      <div className="mb-6 flex items-center justify-between bg-slate-50 border border-slate-200/60 p-5 rounded-lg shadow-sm">
+    <div className="mx-auto max-w-7xl p-6 font-sans antialiased select-none bg-white">
+      <div className="mb-6 flex items-center justify-between rounded-lg border border-slate-200/60 bg-slate-50 p-5 shadow-sm">
         <div>
-          <h1 className="text-xl uppercase font-bold text-[#1a4b8c] tracking-tight">
+          <h1 className="text-xl font-bold tracking-tight text-[#1a4b8c]">
             Hospital Command <span className="text-[#029352]">Center</span>
           </h1>
-          <p className="text-xs text-slate-500 mt-1 font-medium leading-relaxed">
+
+          <p className="mt-1 text-xs font-medium leading-relaxed text-slate-500">
             Real-time systemic auditing, employee performance, and revenue
             aggregation dashboard.
           </p>
         </div>
-        <div className="bg-[#1a4b8c]/10 text-[#1a4b8c] p-2.5 rounded-lg border border-blue-100 shrink-0">
-          <Building className="w-5 h-5" />
+
+        <div className="shrink-0 rounded-lg border border-blue-100 bg-[#1a4b8c]/10 p-2.5 text-[#1a4b8c]">
+          <Building className="h-5 w-5" />
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+      <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-4">
         <MetricCard
           title="Total Registered Patients"
           value={metrics?.totalPatientsRegistered ?? 0}
@@ -95,7 +136,6 @@ export const AdminDashboard: React.FC = () => {
           isGreenTheme={false}
         />
 
-        {/* Active Hospital Staff - Official Validation Green Theme */}
         <MetricCard
           title="Active Hospital Staff"
           value={metrics?.totalHospitalStaffAccounts ?? 0}
@@ -121,34 +161,113 @@ export const AdminDashboard: React.FC = () => {
         />
       </div>
 
-      <div className="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-5">
-        {/* Active Operation Feeds Panel */}
-        <div className="lg:col-span-2 bg-white border border-slate-200/80 p-5 rounded-lg shadow-sm min-h-60 flex flex-col justify-between group">
-          <div className="border-b border-slate-100 pb-2.5">
-            <h4 className="font-bold text-slate-800 text-sm tracking-tight transition-colors duration-150 group-hover:text-[#1a4b8c]">
-              Active Operation Feeds
-            </h4>
-            <p className="text-xs text-slate-400 font-medium mt-0.5">
-              Clinical queues running live across operational departments.
+      <div className="mt-6 grid grid-cols-1 gap-5 lg:grid-cols-3">
+        <div className="group min-h-60 rounded-lg border border-slate-200/80 bg-white p-5 shadow-sm transition-all hover:border-[#1a4b8c]/30 lg:col-span-2">
+          <div className="mb-3 border-b border-slate-100 pb-2.5">
+            <div className="flex items-center gap-2 text-[#1a4b8c]">
+              <ActivitySquare className="h-4 w-4" />
+
+              <h4 className="text-sm font-bold tracking-tight text-slate-800">
+                Active Operation Feeds
+              </h4>
+            </div>
+
+            <p className="mt-0.5 text-xs font-medium text-slate-400">
+              Clinical patient folders synchronized live from front desk
+              registries.
             </p>
           </div>
-          <div className="flex-1 flex items-center justify-center text-slate-400 text-xs font-medium italic">
-            All medical system diagnostics pipelines are operational.
+
+          <div className="flex-1 overflow-x-auto">
+            {liveQueue.length === 0 ? (
+              <div className="py-10 text-center text-xs italic text-slate-400">
+                No recent patients directories entries.
+              </div>
+            ) : (
+              <table className="w-full border-collapse text-left text-xs">
+                <thead>
+                  <tr className="border-b border-slate-100 bg-slate-50 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                    <th className="px-3 py-2">Patient Code</th>
+                    <th className="px-3 py-2">Name</th>
+                    <th className="px-3 py-2">Contact</th>
+                    <th className="px-3 py-2">Gender</th>
+                  </tr>
+                </thead>
+
+                <tbody className="divide-y divide-slate-50 font-medium text-slate-600">
+                  {liveQueue.map((patient: any) => (
+                    <tr
+                      key={patient._id}
+                      className="transition-colors hover:bg-slate-50/50"
+                    >
+                      <td className="px-3 py-2.5 font-mono text-sm font-bold text-[#1a4b8c]">
+                        {patient.patientId}
+                      </td>
+
+                      <td className="px-3 py-2.5 font-bold text-slate-800">
+                        {patient.name}
+                      </td>
+
+                      <td className="px-3 py-2.5 text-slate-500">
+                        {patient.phone}
+                      </td>
+
+                      <td className="px-3 py-2.5">
+                        <span className="rounded bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-600">
+                          {patient.gender}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
           </div>
         </div>
 
-        {/* Security Log Summary Panel */}
-        <div className="bg-white border border-slate-200/80 p-5 rounded-lg shadow-sm min-h-60 flex flex-col justify-between group">
-          <div className="border-b border-slate-100 pb-2.5">
-            <h4 className="font-bold text-slate-800 text-sm tracking-tight transition-colors duration-150 group-hover:text-[#1a4b8c]">
-              Security Log Summary
-            </h4>
-            <p className="text-xs text-slate-400 font-medium mt-0.5">
-              Cryptographic access authorization audits matrix data feed.
+        {/* Security Log Summary */}
+        <div className="group min-h-60 rounded-lg border border-slate-200/80 bg-white p-5 shadow-sm transition-all hover:border-[#029352]/30">
+          <div className="mb-3 border-b border-slate-100 pb-2.5">
+            <div className="flex items-center gap-2 text-[#029352]">
+              <Terminal className="h-4 w-4" />
+
+              <h4 className="text-sm font-bold tracking-tight text-slate-800">
+                Security Log Summary
+              </h4>
+            </div>
+
+            <p className="mt-0.5 text-xs font-medium text-slate-400">
+              Cryptographic access authorization audits matrix live transaction
+              feed.
             </p>
           </div>
-          <div className="flex-1 flex items-center justify-center text-slate-400 text-xs font-medium italic">
-            RBAC encryption keys are secure.
+
+          <div className="flex-1 space-y-2">
+            {securityLogs.map((log) => (
+              <div
+                key={log.id}
+                className="flex items-center justify-between rounded-md border border-slate-100 bg-slate-50/50 p-2.5 transition-colors hover:bg-slate-50"
+              >
+                <div className="flex items-center gap-2">
+                  <div className="rounded bg-[#029352]/10 px-1.5 py-0.5 text-[9px] font-mono font-bold text-[#029352]">
+                    {log.id}
+                  </div>
+
+                  <div>
+                    <p className="text-xs font-bold text-slate-700">
+                      {log.event}
+                    </p>
+
+                    <p className="text-[10px] text-slate-500">By: {log.user}</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-1 text-[10px] font-medium text-slate-400">
+                  <Clock className="h-3 w-3" />
+                  <span>{log.time}</span>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </div>

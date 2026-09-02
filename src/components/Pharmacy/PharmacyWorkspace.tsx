@@ -1,12 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import React, { useState } from "react";
-import {
-  PlusCircle,
-  ShoppingCart,
-  Pill,
-  BadgeDollarSign,
-} from "lucide-react";
+import { PlusCircle, ShoppingCart, Pill, BadgeDollarSign } from "lucide-react";
 import { hmsPharmacyServices } from "../../services/pharmacyService";
 
 export const PharmacyWorkspace: React.FC = () => {
@@ -42,8 +37,7 @@ export const PharmacyWorkspace: React.FC = () => {
     };
 
     try {
-      const response =
-        await hmsPharmacyServices.addMedicineToStock(payload);
+      const response = await hmsPharmacyServices.addMedicineToStock(payload);
 
       if (response.success && response.data) {
         setSuccessMsg(
@@ -114,9 +108,8 @@ export const PharmacyWorkspace: React.FC = () => {
     <div className="mx-auto max-w-7xl p-6 font-sans antialiased text-slate-700">
       <div className="mb-6 flex items-center justify-between rounded-lg border border-slate-200/60 bg-slate-50 p-5 shadow-sm">
         <div>
-          <h1 className="text-xl font-semibold tracking-tight text-[#1a4b8c]">
-            Pharmacy{" "}
-            <span className="text-[#029352]">Workspace</span>
+          <h1 className="text-xl font-bold tracking-tight text-[#1a4b8c]">
+            Pharmacy <span className="text-[#029352]">Workspace</span>
           </h1>
 
           <p className="mt-1 text-xs font-medium leading-relaxed text-slate-500">
@@ -151,8 +144,7 @@ export const PharmacyWorkspace: React.FC = () => {
 
             <div>
               <h3 className="text-sm font-bold uppercase tracking-wide text-[#1a4b8c]">
-                Manage Drug{" "}
-                <span className="text-[#029352]">Inventory</span>
+                Manage Drug <span className="text-[#029352]">Inventory</span>
               </h3>
 
               <p className="mt-0.5 text-[10px] font-medium text-slate-400">
@@ -178,41 +170,40 @@ export const PharmacyWorkspace: React.FC = () => {
                 />
               </div>
 
-             <div className="font-sans antialiased">
-  <label className="mb-1 block text-[11px] font-bold uppercase tracking-wide text-slate-400 select-none">
-    Formulation Category
-  </label>
+              <div className="font-sans antialiased">
+                <label className="mb-1 block text-[11px] font-bold uppercase tracking-wide text-slate-400 select-none">
+                  Formulation Category
+                </label>
 
-  <div className="relative w-full">
-    <select
-      value={category}
-      onChange={(event) => setCategory(event.target.value)}
-      className="w-full cursor-pointer rounded-md border border-slate-200 bg-slate-50 pl-3 pr-10 py-2.5 text-xs font-bold uppercase tracking-wide text-slate-500 outline-none transition-all duration-200 focus:border-[#1a4b8c] focus:bg-white focus:ring-2 focus:ring-[#1a4b8c]/10 appearance-none shadow-sm"
-    >
-      <option value="Tablet">TABLET</option>
-      <option value="Capsule">CAPSULE</option>
-      <option value="Syrup">SYRUP</option>
-      <option value="Injection">INJECTION</option>
-    </select>
+                <div className="relative w-full">
+                  <select
+                    value={category}
+                    onChange={(event) => setCategory(event.target.value)}
+                    className="w-full cursor-pointer rounded-md border border-slate-200 bg-slate-50 pl-3 pr-10 py-2.5 text-xs font-bold uppercase tracking-wide text-slate-500 outline-none transition-all duration-200 focus:border-[#1a4b8c] focus:bg-white focus:ring-2 focus:ring-[#1a4b8c]/10 appearance-none shadow-sm"
+                  >
+                    <option value="Tablet">TABLET</option>
+                    <option value="Capsule">CAPSULE</option>
+                    <option value="Syrup">SYRUP</option>
+                    <option value="Injection">INJECTION</option>
+                  </select>
 
-    <div className="absolute inset-y-0 right-2 flex items-center pointer-events-none text-slate-400">
-      <svg
-        className="w-4 h-4"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth="2.5"
-          d="M19 9l-7 7-7-7"
-        />
-      </svg>
-    </div>
-  </div>
-</div>
-
+                  <div className="absolute inset-y-0 right-2 flex items-center pointer-events-none text-slate-400">
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2.5"
+                        d="M19 9l-7 7-7-7"
+                      />
+                    </svg>
+                  </div>
+                </div>
+              </div>
             </div>
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -286,8 +277,7 @@ export const PharmacyWorkspace: React.FC = () => {
 
             <div>
               <h3 className="text-sm font-bold uppercase tracking-wide text-[#1a4b8c]">
-                Dispense Sales{" "}
-                <span className="text-[#029352]">Order</span>
+                Dispense Sales <span className="text-[#029352]">Order</span>
               </h3>
 
               <p className="mt-0.5 text-[10px] font-medium text-slate-400">

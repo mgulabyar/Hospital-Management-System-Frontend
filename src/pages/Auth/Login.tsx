@@ -39,7 +39,6 @@ export const Login: React.FC = () => {
   return (
     <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4 font-sans antialiased select-none">
       <div className="max-w-sm w-full bg-white rounded-lg border border-slate-200/60 shadow-xl p-6 transition-all duration-300">
-        {/* LOGO & HEADINGS */}
         <div className="text-center mb-6">
           <img
             src="/logo.png"

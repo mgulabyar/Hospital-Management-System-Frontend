@@ -3,7 +3,6 @@ import {
   LayoutDashboard,
   Users,
   ShieldAlert,
-  Layers,
   UserRoundCheck,
   Stethoscope,
   Beaker,
@@ -20,6 +19,7 @@ export const MainSidebar: React.FC<MainSidebarProps> = ({
   currentTab,
   setCurrentTab,
 }) => {
+  // FIXED: Removed the redundant 'financial_ledger' element object from the array loop
   const tabs = [
     {
       id: "dashboard",
@@ -85,15 +85,6 @@ export const MainSidebar: React.FC<MainSidebarProps> = ({
       },
     },
     {
-      id: "financial_ledger",
-      name: "Financial Billings",
-      icon: Layers,
-      badge: {
-        text: "AUDIT",
-        color: "bg-amber-50 text-amber-700 border border-amber-100",
-      },
-    },
-    {
       id: "system_security",
       name: "Audit Security Logs",
       icon: ShieldAlert,
@@ -106,7 +97,7 @@ export const MainSidebar: React.FC<MainSidebarProps> = ({
 
   return (
     <aside className="sticky top-16 flex h-[calc(100vh-4rem)] w-66 shrink-0 flex-col border-r border-slate-200/80 bg-white font-sans antialiased">
-      
+      {/* Access Authentication Branding Box */}
       <div className="border-b border-slate-100 bg-slate-50/50 p-4 select-none">
         <span className="block text-[11px] font-bold uppercase tracking-wide text-slate-400">
           Access Framework
@@ -116,7 +107,7 @@ export const MainSidebar: React.FC<MainSidebarProps> = ({
         </h3>
       </div>
 
-      {/* Main Navigation Sidebar Links Grid */}
+      {/* Navigation Map Action Buttons Area Container */}
       <nav
         className="custom-scrollbar flex-1 space-y-2.5 overflow-y-auto px-3 py-3"
         aria-label="Hospital management navigation"
@@ -155,9 +146,7 @@ export const MainSidebar: React.FC<MainSidebarProps> = ({
               {tab.badge && (
                 <span
                   className={`ml-auto rounded-full px-1.5 py-0.5 text-[8px] font-extrabold uppercase tracking-wide transition-all ${
-                    isActive 
-                      ? "bg-white/20 text-white" 
-                      : tab.badge.color
+                    isActive ? "bg-white/20 text-white" : tab.badge.color
                   }`}
                 >
                   {tab.badge.text}
@@ -168,7 +157,7 @@ export const MainSidebar: React.FC<MainSidebarProps> = ({
         })}
       </nav>
 
-      {/* Footer Branding Layer Widgets */}
+      {/* Static Footer Brand Labels */}
       <div className="shrink-0 border-t border-slate-100 bg-slate-50/30 p-3.5 text-center select-none">
         <span className="block text-[10px] font-semibold uppercase tracking-wide text-slate-400">
           HMS Node v1.0.0 Stable
@@ -177,7 +166,6 @@ export const MainSidebar: React.FC<MainSidebarProps> = ({
           Secure Medical Operations
         </span>
       </div>
-
     </aside>
   );
 };
