@@ -6,17 +6,16 @@ import {
   UserPlus,
   Ticket,
   RefreshCw,
-  Search,
   HeartPulse,
-  ShieldAlert,
+  ClipboardCheck,
 } from "lucide-react";
 import { hmsServices } from "../../services/apiService";
+import { hmsReceptionServices } from "../../services/receptionService";
 
 export const ReceptionistWorkspace: React.FC = () => {
   const [patients, setPatients] = useState<any[]>([]);
   const [doctors, setDoctors] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
-  const [searchQuery, setSearchQuery] = useState<string>("");
 
   const [name, setName] = useState<string>("");
   const [age, setAge] = useState<string>("");
@@ -29,21 +28,22 @@ export const ReceptionistWorkspace: React.FC = () => {
 
   const [selectedPatientId, setSelectedPatientId] = useState<string>("");
   const [selectedDoctorId, setSelectedDoctorId] = useState<string>("");
-  const [department, setDepartment] = useState<string>("General OPD");
+  const [department, setDepartment] = useState<string>("Cardiology");
   const [bp, setBp] = useState<string>("120/80");
-  const [pulse, setPulse] = useState<string>("72");
+  const [pulse, setPulse] = useState<string>("75");
   const [weight, setWeight] = useState<string>("70");
   const [temp, setTemp] = useState<string>("98.6");
 
   const [successMsg, setSuccessMsg] = useState<string>("");
   const [errorMsg, setErrorMsg] = useState<string>("");
 
-  const syncFrontDeskData = useCallback(async () => {
+  const syncFrontDeskDataRegistry = useCallback(async () => {
     setLoading(true);
     setErrorMsg("");
 
     try {
-      const patientResponse = await hmsServices.staff.getAllStaff("patient");
+      const patientResponse =
+        await hmsReceptionServices.getRegisteredPatients();
 
       if (patientResponse.success) {
         setPatients(patientResponse.data || []);
@@ -57,7 +57,7 @@ export const ReceptionistWorkspace: React.FC = () => {
     } catch (err: any) {
       setErrorMsg(
         err?.response?.data?.message ||
-          "Failed to synchronize front-desk data streams.",
+          "Failed to sync front-desk modules database layers.",
       );
     } finally {
       setLoading(false);
@@ -65,10 +65,10 @@ export const ReceptionistWorkspace: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    syncFrontDeskData();
-  }, [syncFrontDeskData]);
+    syncFrontDeskDataRegistry();
+  }, [syncFrontDeskDataRegistry]);
 
-  const handleRegisterPatient = async (
+  const handleRegisterPatientForm = async (
     event: React.FormEvent<HTMLFormElement>,
   ) => {
     event.preventDefault();
@@ -87,15 +87,16 @@ export const ReceptionistWorkspace: React.FC = () => {
         relation: emergencyRelation.trim(),
         phone: emergencyPhone.trim(),
       },
-      password: "Patient@123",
-      role: "patient",
     };
 
     try {
-      const response = await hmsServices.staff.createStaffAccount(payload);
+      const response =
+        await hmsReceptionServices.registerPatientProfile(payload);
 
-      if (response.success) {
-        setSuccessMsg(`Patient account "${name}" created successfully.`);
+      if (response.success && response.data) {
+        setSuccessMsg(
+          `Success: Patient assigned official UHID ${response.data.patientId} inside server collections.`,
+        );
 
         setName("");
         setAge("");
@@ -106,70 +107,72 @@ export const ReceptionistWorkspace: React.FC = () => {
         setEmergencyRelation("");
         setEmergencyPhone("");
 
-        await syncFrontDeskData();
-      } else {
-        setErrorMsg("Patient registration could not be completed.");
+        await syncFrontDeskDataRegistry();
       }
     } catch (err: any) {
       setErrorMsg(
         err?.response?.data?.message ||
-          "Patient directory registration failed.",
+          "Failed to complete permanent profile registry.",
       );
     }
   };
 
-  const handleIssueToken = async (event: React.FormEvent<HTMLFormElement>) => {
+  const handleIssueTokenTicketForm = async (
+    event: React.FormEvent<HTMLFormElement>,
+  ) => {
     event.preventDefault();
 
     setSuccessMsg("");
     setErrorMsg("");
 
     if (!selectedPatientId || !selectedDoctorId) {
-      setErrorMsg("Please select a valid patient and assigned duty doctor.");
+      setErrorMsg(
+        "Validation Warning: Ensure active profile mapping fields are selected.",
+      );
       return;
     }
 
+    const payload = {
+      patient: selectedPatientId,
+      doctor: selectedDoctorId,
+      department,
+      vitals: {
+        bp,
+        pulse: Number(pulse),
+        weight: Number(weight),
+        temperature: Number(temp),
+      },
+    };
+
     try {
-      /*
-       * یہاں اپنے actual appointment/token service method کو call کریں۔
-       * مثال:
-       * await hmsServices.appointments.createAppointment({
-       *   patientId: selectedPatientId,
-       *   doctorId: selectedDoctorId,
-       *   department,
-       *   vitals: { bp, pulse, weight, temp },
-       * });
-       */
+      const response = await hmsReceptionServices.issueOPDQueueToken(payload);
 
-      setSuccessMsg(
-        "OPD token allocated successfully. Patient moved to doctor queue.",
-      );
+      if (response.success && response.data) {
+        setSuccessMsg(
+          `Success: OPD Entry Token issued successfully #${response.data.tokenNumber}.`,
+        );
 
-      setSelectedPatientId("");
-      setSelectedDoctorId("");
-      setDepartment("General OPD");
-      setBp("120/80");
-      setPulse("72");
-      setWeight("70");
-      setTemp("98.6");
+        setSelectedPatientId("");
+        setSelectedDoctorId("");
+        setDepartment("Cardiology");
+        setBp("120/80");
+        setPulse("75");
+        setWeight("70");
+        setTemp("98.6");
+      }
     } catch (err: any) {
       setErrorMsg(
-        err?.response?.data?.message || "OPD token generation failed.",
+        err?.response?.data?.message ||
+          "Failed to issue active checkup parameters line token.",
       );
     }
   };
-
-  const filteredPatients = patients.filter((patient: any) =>
-    `${patient.name || ""} ${patient.phone || ""}`
-      .toLowerCase()
-      .includes(searchQuery.toLowerCase()),
-  );
 
   return (
     <div className="mx-auto max-w-7xl p-6 font-sans antialiased text-slate-700">
       <div className="mb-6 flex items-center justify-between rounded-lg border border-slate-200/60 bg-slate-50 p-5 shadow-sm">
         <div>
-          <h1 className="text-lg uppercase font-bold tracking-tight text-[#1a4b8c]">
+          <h1 className="text-xl  font-semibold tracking-tight text-[#1a4b8c]">
             Receptionist <span className="text-[#029352]">Workspace</span>
           </h1>
 
@@ -190,22 +193,20 @@ export const ReceptionistWorkspace: React.FC = () => {
       )}
 
       {errorMsg && (
-        <div className="mb-4 flex items-center gap-2 rounded-lg border border-rose-100 bg-rose-50 p-4 text-xs font-bold text-rose-600 shadow-sm">
-          <ShieldAlert className="h-4 w-4 shrink-0" />
-          <span>{errorMsg}</span>
+        <div className="mb-4 rounded-lg border border-rose-100 bg-rose-50 p-4 text-xs font-bold text-rose-600 shadow-sm">
+          {errorMsg}
         </div>
       )}
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        {/* Patient Registration Panel */}
         <div className="rounded-lg border border-slate-200/80 bg-white p-5 shadow-sm">
-          <div className="mb-4 flex items-center gap-2 border-b border-slate-100 pb-3 text-[#1a4b8c]">
+          <div className="mb-4 flex items-center gap-2 border-b border-slate-100 pb-3">
             <div className="rounded-lg bg-[#1a4b8c]/10 p-2 text-[#1a4b8c]">
               <UserPlus className="h-4 w-4" />
             </div>
 
             <div>
-              <h3 className="text-sm font-bold uppercase tracking-wide">
+              <h3 className="text-sm font-bold uppercase text-[#1a4b8c]">
                 Patient Entry <span className="text-[#029352]">Directory</span>
               </h3>
 
@@ -215,7 +216,7 @@ export const ReceptionistWorkspace: React.FC = () => {
             </div>
           </div>
 
-          <form onSubmit={handleRegisterPatient} className="space-y-4">
+          <form onSubmit={handleRegisterPatientForm} className="space-y-4">
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
                 <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-slate-400">
@@ -228,7 +229,7 @@ export const ReceptionistWorkspace: React.FC = () => {
                   value={name}
                   onChange={(event) => setName(event.target.value)}
                   placeholder="Kamran Khan"
-                  className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2.5 text-xs font-medium outline-none transition-all focus:border-[#029352] focus:bg-white focus:ring-2 focus:ring-[#029352]/10"
+                  className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2.5 text-xs font-medium text-slate-700 outline-none transition-all placeholder:text-slate-300 focus:border-[#1a4b8c] focus:bg-white focus:ring-2 focus:ring-[#1a4b8c]/10"
                 />
               </div>
 
@@ -243,7 +244,7 @@ export const ReceptionistWorkspace: React.FC = () => {
                   value={phone}
                   onChange={(event) => setPhone(event.target.value)}
                   placeholder="03001234567"
-                  className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2.5 text-xs font-medium outline-none transition-all focus:border-[#029352] focus:bg-white focus:ring-2 focus:ring-[#029352]/10"
+                  className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2.5 text-xs font-medium text-slate-700 outline-none transition-all placeholder:text-slate-300 focus:border-[#1a4b8c] focus:bg-white focus:ring-2 focus:ring-[#1a4b8c]/10"
                 />
               </div>
             </div>
@@ -262,24 +263,42 @@ export const ReceptionistWorkspace: React.FC = () => {
                   value={age}
                   onChange={(event) => setAge(event.target.value)}
                   placeholder="34"
-                  className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2.5 text-xs font-medium outline-none transition-all focus:border-[#029352] focus:bg-white focus:ring-2 focus:ring-[#029352]/10"
+                  className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2.5 text-xs font-medium text-slate-700 outline-none transition-all placeholder:text-slate-300 focus:border-[#1a4b8c] focus:bg-white focus:ring-2 focus:ring-[#1a4b8c]/10"
                 />
               </div>
 
-              <div>
-                <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-slate-400">
+              <div className="font-sans antialiased">
+                <label className="mb-1 block text-[11px] font-bold uppercase tracking-wide text-slate-400 select-none">
                   Gender Specification
                 </label>
 
-                <select
-                  value={gender}
-                  onChange={(event) => setGender(event.target.value)}
-                  className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2.5 text-xs font-bold text-slate-500 outline-none transition-all focus:border-[#029352] focus:bg-white focus:ring-2 focus:ring-[#029352]/10"
-                >
-                  <option value="Male">MALE</option>
-                  <option value="Female">FEMALE</option>
-                  <option value="Other">OTHER</option>
-                </select>
+                <div className="relative w-full">
+                  <select
+                    value={gender}
+                    onChange={(event) => setGender(event.target.value)}
+                    className="w-full cursor-pointer rounded-md border border-slate-200 bg-slate-50 pl-3 pr-10 py-2.5 text-xs font-bold uppercase tracking-wide text-slate-500 outline-none transition-all duration-200 focus:border-[#1a4b8c] focus:bg-white focus:ring-2 focus:ring-[#1a4b8c]/10 appearance-none"
+                  >
+                    <option value="Male">MALE</option>
+                    <option value="Female">FEMALE</option>
+                    <option value="Other">OTHER</option>
+                  </select>
+
+                  <div className="absolute inset-y-0 right-2 flex items-center pointer-events-none text-slate-400">
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2.5"
+                        d="M19 9l-7 7-7-7"
+                      />
+                    </svg>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -293,17 +312,17 @@ export const ReceptionistWorkspace: React.FC = () => {
                 required
                 value={address}
                 onChange={(event) => setAddress(event.target.value)}
-                placeholder="House 45, Street 3, Islamabad"
-                className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2.5 text-xs font-medium outline-none transition-all focus:border-[#029352] focus:bg-white focus:ring-2 focus:ring-[#029352]/10"
+                placeholder="House 45, Street 3, Lahore"
+                className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2.5 text-xs font-medium text-slate-700 outline-none transition-all placeholder:text-slate-300 focus:border-[#1a4b8c] focus:bg-white focus:ring-2 focus:ring-[#1a4b8c]/10"
               />
             </div>
 
-            <div className="rounded-md border border-[#029352]/20 bg-[#029352]/5 p-4">
+            <div className="rounded-lg border border-[#029352]/20 bg-[#029352]/5 p-4">
               <div className="mb-3 flex items-center gap-2">
-                <ShieldAlert className="h-4 w-4 text-[#029352]" />
+                <ClipboardCheck className="h-4 w-4 text-[#029352]" />
 
-                <h4 className="text-[11px] font-bold uppercase text-[#1a4b8c]">
-                  Emergency Contact
+                <h4 className="text-[10px] font-bold uppercase tracking-wider text-[#1a4b8c]">
+                  Emergency Contact Node
                 </h4>
               </div>
 
@@ -314,7 +333,7 @@ export const ReceptionistWorkspace: React.FC = () => {
                   value={emergencyName}
                   onChange={(event) => setEmergencyName(event.target.value)}
                   placeholder="Name"
-                  className="w-full rounded-md border border-slate-200 bg-white px-2.5 py-2 text-xs font-medium outline-none transition-all focus:border-[#029352] focus:ring-2 focus:ring-[#029352]/10"
+                  className="w-full rounded-md border border-slate-200 bg-white px-2.5 py-2.5 text-xs font-medium text-slate-700 outline-none transition-all placeholder:text-slate-300 focus:border-[#029352] focus:ring-2 focus:ring-[#029352]/10"
                 />
 
                 <input
@@ -323,7 +342,7 @@ export const ReceptionistWorkspace: React.FC = () => {
                   value={emergencyRelation}
                   onChange={(event) => setEmergencyRelation(event.target.value)}
                   placeholder="Relation"
-                  className="w-full rounded-md border border-slate-200 bg-white px-2.5 py-2 text-xs font-medium outline-none transition-all focus:border-[#029352] focus:ring-2 focus:ring-[#029352]/10"
+                  className="w-full rounded-md border border-slate-200 bg-white px-2.5 py-2.5 text-xs font-medium text-slate-700 outline-none transition-all placeholder:text-slate-300 focus:border-[#029352] focus:ring-2 focus:ring-[#029352]/10"
                 />
 
                 <input
@@ -332,7 +351,7 @@ export const ReceptionistWorkspace: React.FC = () => {
                   value={emergencyPhone}
                   onChange={(event) => setEmergencyPhone(event.target.value)}
                   placeholder="Phone"
-                  className="w-full rounded-md border border-slate-200 bg-white px-2.5 py-2 text-xs font-medium outline-none transition-all focus:border-[#029352] focus:ring-2 focus:ring-[#029352]/10"
+                  className="w-full rounded-md border border-slate-200 bg-white px-2.5 py-2.5 text-xs font-medium text-slate-700 outline-none transition-all placeholder:text-slate-300 focus:border-[#029352] focus:ring-2 focus:ring-[#029352]/10"
                 />
               </div>
             </div>
@@ -340,24 +359,23 @@ export const ReceptionistWorkspace: React.FC = () => {
             <button
               type="submit"
               disabled={loading}
-              className="flex w-full items-center justify-center gap-2 rounded-md bg-[#1a4b8c] cursor-pointer px-4 py-3 text-[12px] font-bold uppercase tracking-wider text-white shadow-sm transition-colors hover:bg-[#143b6e] focus:outline-none focus:ring-2 focus:ring-[#029352]/30 disabled:cursor-not-allowed disabled:opacity-60"
+              className="flex w-full items-center cursor-pointer justify-center gap-2 rounded-lg bg-[#1a4b8c] px-4 py-3 text-[11px] font-semibold uppercase tracking-wider text-white shadow-sm transition-colors hover:bg-[#143b6e] focus:outline-none focus:ring-2 focus:ring-[#029352]/30 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              <UserPlus className="h-3.5 w-3.5" />
+              <UserPlus className="h-4 w-4" />
               <span>Commit Directory Profile</span>
             </button>
           </form>
         </div>
 
-        {/* OPD Token Panel */}
         <div className="rounded-lg border border-slate-200/80 bg-white p-5 shadow-sm">
           <div className="mb-4 flex items-center justify-between border-b border-slate-100 pb-3">
-            <div className="flex items-center gap-2 text-[#1a4b8c]">
+            <div className="flex items-center gap-2">
               <div className="rounded-lg bg-[#029352]/10 p-2 text-[#029352]">
                 <Ticket className="h-4 w-4" />
               </div>
 
               <div>
-                <h3 className="text-sm font-bold uppercase tracking-wide">
+                <h3 className="text-sm font-bold uppercase text-[#1a4b8c]">
                   Issue OPD Queue <span className="text-[#029352]">Token</span>
                 </h3>
 
@@ -369,7 +387,7 @@ export const ReceptionistWorkspace: React.FC = () => {
 
             <button
               type="button"
-              onClick={syncFrontDeskData}
+              onClick={syncFrontDeskDataRegistry}
               disabled={loading}
               className="rounded-lg border border-slate-200 p-2 text-slate-400 transition-colors hover:bg-[#1a4b8c]/5 hover:text-[#1a4b8c] disabled:cursor-not-allowed disabled:opacity-50"
               title="Refresh Patients and Doctors"
@@ -380,67 +398,87 @@ export const ReceptionistWorkspace: React.FC = () => {
             </button>
           </div>
 
-          <form onSubmit={handleIssueToken} className="space-y-4">
-            <div>
-              <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                Search Patient Profile
-              </label>
-
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#1a4b8c]/60" />
-
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(event) => setSearchQuery(event.target.value)}
-                  placeholder="Search by patient name or phone"
-                  className="w-full rounded-md border border-slate-200 bg-slate-50 py-2.5 pl-9 pr-3 text-xs font-medium outline-none transition-all focus:border-[#029352] focus:bg-white focus:ring-2 focus:ring-[#029352]/10"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-slate-400">
+          <form onSubmit={handleIssueTokenTicketForm} className="space-y-4">
+            <div className="font-sans antialiased">
+              <label className="mb-1 block text-[11px] font-bold uppercase tracking-wide text-slate-400 select-none">
                 Target Patient Profile
               </label>
 
-              <select
-                required
-                value={selectedPatientId}
-                onChange={(event) => setSelectedPatientId(event.target.value)}
-                className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2.5 text-xs font-bold uppercase text-slate-600 outline-none transition-all focus:border-[#029352] focus:bg-white focus:ring-2 focus:ring-[#029352]/10"
-              >
-                <option value="">SELECT PATIENT</option>
+              <div className="relative w-full">
+                <select
+                  required
+                  value={selectedPatientId}
+                  onChange={(event) => setSelectedPatientId(event.target.value)}
+                  className="w-full cursor-pointer rounded-md border border-slate-200 bg-slate-50 pl-3 pr-10 py-2.5 text-xs font-bold uppercase text-slate-600 outline-none transition-all duration-200 focus:border-[#029352] focus:bg-white focus:ring-2 focus:ring-[#029352]/10 appearance-none shadow-sm"
+                >
+                  <option value="">SELECT PATIENT</option>
 
-                {filteredPatients.map((patient: any) => (
-                  <option key={patient._id} value={patient._id}>
-                    {(patient.name || "Unknown Patient").toUpperCase()}
-                    {patient.phone ? ` - ${patient.phone}` : ""}
-                  </option>
-                ))}
-              </select>
+                  {patients.map((patient: any) => (
+                    <option key={patient._id} value={patient._id}>
+                      {(patient.name || "Unknown Patient").toUpperCase()}
+                      {patient.patientId ? ` (${patient.patientId})` : ""}
+                    </option>
+                  ))}
+                </select>
+
+                <div className="absolute inset-y-0 right-2 flex items-center pointer-events-none text-slate-400">
+                  <svg
+                    className="w-4 h-4 transition-colors duration-200"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2.5"
+                      d="M19 9l-7 7-7-7"
+                    />
+                  </svg>
+                </div>
+              </div>
             </div>
 
-            <div>
-              <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                Assigned Practitioner
-              </label>
+          <div className="font-sans antialiased">
+  <label className="mb-1 block text-[11px] font-bold uppercase tracking-wide text-slate-400 select-none">
+    Assigned Practitioner
+  </label>
 
-              <select
-                required
-                value={selectedDoctorId}
-                onChange={(event) => setSelectedDoctorId(event.target.value)}
-                className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2.5 text-xs font-bold uppercase text-slate-600 outline-none transition-all focus:border-[#029352] focus:bg-white focus:ring-2 focus:ring-[#029352]/10"
-              >
-                <option value="">SELECT DOCTOR</option>
+  <div className="relative w-full">
+    <select
+      required
+      value={selectedDoctorId}
+      onChange={(event) => setSelectedDoctorId(event.target.value)}
+      className="w-full cursor-pointer rounded-md border border-slate-200 bg-slate-50 pl-3 pr-10 py-2.5 text-xs font-bold uppercase text-slate-600 outline-none transition-all duration-200 focus:border-[#029352] focus:bg-white focus:ring-2 focus:ring-[#029352]/10 appearance-none shadow-sm"
+    >
+      <option value="">SELECT DOCTOR</option>
 
-                {doctors.map((doctor: any) => (
-                  <option key={doctor._id} value={doctor._id}>
-                    {(doctor.name || "Unknown Doctor").toUpperCase()}
-                  </option>
-                ))}
-              </select>
-            </div>
+      {doctors.map((doctor: any) => (
+        <option key={doctor._id} value={doctor._id}>
+          {(doctor.name || "Unknown Doctor").toUpperCase()}
+        </option>
+      ))}
+    </select>
+
+    {/* Exact synchronized vector arrow element overlay placed precisely at right-4 */}
+    <div className="absolute inset-y-0 right-2 flex items-center pointer-events-none text-slate-400">
+      <svg
+        className="w-4 h-4"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth="2.5"
+          d="M19 9l-7 7-7-7"
+        />
+      </svg>
+    </div>
+  </div>
+</div>
+
 
             <div>
               <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-slate-400">
@@ -452,13 +490,13 @@ export const ReceptionistWorkspace: React.FC = () => {
                 required
                 value={department}
                 onChange={(event) => setDepartment(event.target.value)}
-                className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2.5 text-xs font-bold text-slate-600 outline-none transition-all focus:border-[#029352] focus:bg-white focus:ring-2 focus:ring-[#029352]/10"
+                className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2.5 text-xs font-bold uppercase text-slate-600 outline-none transition-all focus:border-[#029352] focus:bg-white focus:ring-2 focus:ring-[#029352]/10"
               />
             </div>
 
             <div>
               <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                Patient Blood Pressure
+                Patient Blood Pressure (BP)
               </label>
 
               <input
@@ -466,14 +504,14 @@ export const ReceptionistWorkspace: React.FC = () => {
                 required
                 value={bp}
                 onChange={(event) => setBp(event.target.value)}
-                className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2.5 text-xs font-medium outline-none transition-all focus:border-[#029352] focus:bg-white focus:ring-2 focus:ring-[#029352]/10"
+                className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2.5 text-xs font-medium text-slate-700 outline-none transition-all placeholder:text-slate-300 focus:border-[#029352] focus:bg-white focus:ring-2 focus:ring-[#029352]/10"
               />
             </div>
 
             <div className="grid grid-cols-3 gap-3 rounded-lg border border-[#1a4b8c]/10 bg-[#1a4b8c]/2.5 p-3">
               <div>
                 <label className="mb-1 block text-center text-[9px] font-bold uppercase tracking-wider text-slate-400">
-                  Pulse
+                  Pulse (bpm)
                 </label>
 
                 <input
@@ -481,13 +519,13 @@ export const ReceptionistWorkspace: React.FC = () => {
                   required
                   value={pulse}
                   onChange={(event) => setPulse(event.target.value)}
-                  className="w-full rounded-md border border-slate-200 bg-white px-2 py-2 text-center text-xs font-semibold outline-none focus:border-[#029352]"
+                  className="w-full rounded-md border border-slate-200 bg-white px-2 py-2.5 text-center text-xs font-semibold text-slate-700 outline-none focus:border-[#029352]"
                 />
               </div>
 
               <div>
                 <label className="mb-1 block text-center text-[9px] font-bold uppercase tracking-wider text-slate-400">
-                  Weight
+                  Weight (kg)
                 </label>
 
                 <input
@@ -495,13 +533,13 @@ export const ReceptionistWorkspace: React.FC = () => {
                   required
                   value={weight}
                   onChange={(event) => setWeight(event.target.value)}
-                  className="w-full rounded-md border border-slate-200 bg-white px-2 py-2 text-center text-xs font-semibold outline-none focus:border-[#029352]"
+                  className="w-full rounded-md border border-slate-200 bg-white px-2 py-2.5 text-center text-xs font-semibold text-slate-700 outline-none focus:border-[#029352]"
                 />
               </div>
 
               <div>
                 <label className="mb-1 block text-center text-[9px] font-bold uppercase tracking-wider text-slate-400">
-                  Temp °F
+                  Temp (°F)
                 </label>
 
                 <input
@@ -509,7 +547,7 @@ export const ReceptionistWorkspace: React.FC = () => {
                   required
                   value={temp}
                   onChange={(event) => setTemp(event.target.value)}
-                  className="w-full rounded-md border border-slate-200 bg-white px-2 py-2 text-center text-xs font-semibold outline-none focus:border-[#029352]"
+                  className="w-full rounded-md border border-slate-200 bg-white px-2 py-2.5 text-center text-xs font-semibold text-slate-700 outline-none focus:border-[#029352]"
                 />
               </div>
             </div>
@@ -517,14 +555,15 @@ export const ReceptionistWorkspace: React.FC = () => {
             <button
               type="submit"
               disabled={loading}
-              className="flex w-full items-center justify-center gap-2 rounded-md bg-[#029352] px-4 py-3.5 cursor-pointer text-[12px] font-bold uppercase tracking-wider text-white shadow-sm transition-colors hover:bg-[#017542] focus:outline-none focus:ring-2 focus:ring-[#1a4b8c]/30 disabled:cursor-not-allowed disabled:opacity-60"
+              className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#029352] px-4 py-3 text-[11px] font-semibold uppercase tracking-wider text-white shadow-sm transition-colors hover:bg-[#017542] focus:outline-none focus:ring-2 focus:ring-[#1a4b8c]/30 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              <Ticket className="h-3.5 w-3.5" />
+              <Ticket className="h-4 w-4" />
               <span>Generate Live OPD Token</span>
             </button>
 
             <p className="text-center text-[10px] font-medium italic text-slate-400">
-              OPD tokens increment automatically based on daily queue tracking.
+              OPD token records automatically increment inside MongoDB storage
+              on every dynamic transaction commit.
             </p>
           </form>
         </div>

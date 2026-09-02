@@ -1,74 +1,3 @@
-// import React from "react";
-// import { LayoutDashboard, Users, ShieldAlert, Layers } from "lucide-react";
-
-// interface MainSidebarProps {
-//   currentTab: string;
-//   setCurrentTab: (tab: string) => void;
-// }
-
-// export const MainSidebar: React.FC<MainSidebarProps> = ({
-//   currentTab,
-//   setCurrentTab,
-// }) => {
-//   const tabs = [
-//     { id: "dashboard", name: "Analytics Monitor", icon: LayoutDashboard },
-//     { id: "staff_crud", name: "Manage Hospital Staff", icon: Users },
-//     { id: "financial_ledger", name: "Financial Billings", icon: Layers },
-//     { id: "system_security", name: "Audit Security Logs", icon: ShieldAlert },
-//   ];
-
-//   return (
-//     <aside className="w-66 bg-white border-r border-slate-200/80 flex flex-col font-sans shrink-0 h-[calc(100vh-4rem)] sticky top-16 select-none antialiased">
-//       <div className="p-4 border-b border-slate-100 bg-slate-50/50">
-//         <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wide block">
-//           Access Framework
-//         </span>
-//         <h3 className="font-bold text-sm tracking-normal mt-0.5 text-[#1a4b8c]">
-//           SUPER ADMIN <span className="text-[#029352]">LEVEL</span>
-//         </h3>
-//       </div>
-
-//       <nav className="flex-1 px-3 py-2.5 space-y-2.5 overflow-y-auto custom-scrollbar">
-//         {tabs.map((tab) => {
-//           const Icon = tab.icon;
-//           const isActive = currentTab === tab.id;
-//           return (
-//             <button
-//               key={tab.id}
-//               onClick={() => setCurrentTab(tab.id)}
-//               className={`relative w-full flex items-center gap-3 pl-4 pr-3 py-2.5 rounded-md text-xs font-semibold transition-all duration-150 text-left cursor-pointer focus:outline-none group ${
-//                 isActive
-//                   ? "bg-[#1a4b8c] text-white shadow-md shadow-blue-900/10 font-bold"
-//                   : "text-slate-600 hover:text-[#1a4b8c] hover:bg-slate-50"
-//               }`}
-//             >
-//               {isActive && (
-//                 <div className="absolute left-0 top-2 bottom-2 w-0.75 bg-[#029352] rounded-r-md" />
-//               )}
-
-//               <Icon
-//                 className={`w-4 h-4 shrink-0 transition-colors duration-150 ${
-//                   isActive
-//                     ? "text-white"
-//                     : "text-slate-400 group-hover:text-[#029352]"
-//                 }`}
-//               />
-//               <span className="truncate">{tab.name}</span>
-//             </button>
-//           );
-//         })}
-//       </nav>
-
-//       <div className="p-3.5 border-t border-slate-100 bg-slate-50/30 text-center shrink-0">
-//         <span className="text-[10px] font-semibold text-slate-400 tracking-wide block uppercase">
-//           HMS Node v1.0.0 Stable
-//         </span>
-//       </div>
-//     </aside>
-//   );
-// };
-
-
 import React from "react";
 import {
   LayoutDashboard,
@@ -76,6 +5,10 @@ import {
   ShieldAlert,
   Layers,
   UserRoundCheck,
+  Stethoscope,
+  Beaker,
+  Pill,
+  Receipt,
 } from "lucide-react";
 
 interface MainSidebarProps {
@@ -92,44 +25,98 @@ export const MainSidebar: React.FC<MainSidebarProps> = ({
       id: "dashboard",
       name: "Analytics Monitor",
       icon: LayoutDashboard,
+      badge: {
+        text: "LIVE",
+        color: "bg-[#1a4b8c]/10 text-[#1a4b8c]",
+      },
     },
     {
       id: "receptionist",
       name: "Receptionist Workspace",
       icon: UserRoundCheck,
+      badge: {
+        text: "OPD",
+        color: "bg-[#029352]/10 text-[#029352]",
+      },
+    },
+    {
+      id: "doctor",
+      name: "Doctor Workspace",
+      icon: Stethoscope,
+      badge: {
+        text: "EMR",
+        color: "bg-[#1a4b8c]/10 text-[#1a4b8c]",
+      },
+    },
+    {
+      id: "lab",
+      name: "Laboratory Workspace",
+      icon: Beaker,
+      badge: {
+        text: "TEST",
+        color: "bg-[#029352]/10 text-[#029352]",
+      },
+    },
+    {
+      id: "pharmacy",
+      name: "Pharmacy Workspace",
+      icon: Pill,
+      badge: {
+        text: "RX",
+        color: "bg-[#1a4b8c]/10 text-[#1a4b8c]",
+      },
+    },
+    {
+      id: "billing",
+      name: "Billing Workspace",
+      icon: Receipt,
+      badge: {
+        text: "PAY",
+        color: "bg-[#029352]/10 text-[#029352]",
+      },
     },
     {
       id: "staff_crud",
       name: "Manage Hospital Staff",
       icon: Users,
+      badge: {
+        text: "CRUD",
+        color: "bg-slate-100 text-slate-600",
+      },
     },
     {
       id: "financial_ledger",
       name: "Financial Billings",
       icon: Layers,
+      badge: {
+        text: "AUDIT",
+        color: "bg-amber-50 text-amber-700 border border-amber-100",
+      },
     },
     {
       id: "system_security",
       name: "Audit Security Logs",
       icon: ShieldAlert,
+      badge: {
+        text: "SEC",
+        color: "bg-rose-50 text-rose-600",
+      },
     },
   ];
 
   return (
     <aside className="sticky top-16 flex h-[calc(100vh-4rem)] w-66 shrink-0 flex-col border-r border-slate-200/80 bg-white font-sans antialiased">
-      {/* Sidebar Header */}
-      <div className="border-b border-slate-100 bg-slate-50/50 p-4">
+      
+      <div className="border-b border-slate-100 bg-slate-50/50 p-4 select-none">
         <span className="block text-[11px] font-bold uppercase tracking-wide text-slate-400">
           Access Framework
         </span>
-
         <h3 className="mt-0.5 text-sm font-bold tracking-normal text-[#1a4b8c]">
-          SUPER ADMIN{" "}
-          <span className="text-[#029352]">LEVEL</span>
+          SUPER ADMIN <span className="text-[#029352]">LEVEL</span>
         </h3>
       </div>
 
-      {/* Navigation */}
+      {/* Main Navigation Sidebar Links Grid */}
       <nav
         className="custom-scrollbar flex-1 space-y-2.5 overflow-y-auto px-3 py-3"
         aria-label="Hospital management navigation"
@@ -164,9 +151,16 @@ export const MainSidebar: React.FC<MainSidebarProps> = ({
 
               <span className="truncate">{tab.name}</span>
 
-              {tab.id === "receptionist" && !isActive && (
-                <span className="ml-auto rounded-full bg-[#029352]/10 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wide text-[#029352]">
-                  OPD
+              {/* Dynamic Badges Container Overlay */}
+              {tab.badge && (
+                <span
+                  className={`ml-auto rounded-full px-1.5 py-0.5 text-[8px] font-extrabold uppercase tracking-wide transition-all ${
+                    isActive 
+                      ? "bg-white/20 text-white" 
+                      : tab.badge.color
+                  }`}
+                >
+                  {tab.badge.text}
                 </span>
               )}
             </button>
@@ -174,16 +168,16 @@ export const MainSidebar: React.FC<MainSidebarProps> = ({
         })}
       </nav>
 
-      {/* Sidebar Footer */}
-      <div className="shrink-0 border-t border-slate-100 bg-slate-50/30 p-3.5 text-center">
+      {/* Footer Branding Layer Widgets */}
+      <div className="shrink-0 border-t border-slate-100 bg-slate-50/30 p-3.5 text-center select-none">
         <span className="block text-[10px] font-semibold uppercase tracking-wide text-slate-400">
           HMS Node v1.0.0 Stable
         </span>
-
         <span className="mt-1 block text-[9px] font-medium text-[#029352]">
           Secure Medical Operations
         </span>
       </div>
+
     </aside>
   );
 };
