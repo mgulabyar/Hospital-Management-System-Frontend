@@ -10,6 +10,7 @@ import {
   RefreshCw,
   Users,
   ShieldCheck,
+  Building2,
 } from "lucide-react";
 import { hmsServices } from "../../services/apiService";
 import { AddStaffModal } from "./AddStaffModal";
@@ -66,7 +67,7 @@ export const StaffRegistry: React.FC = () => {
             worker._id === id
               ? {
                   ...worker,
-                  isActive: !worker.isActive,
+                  isActive: response.data?.isActive ?? !worker.isActive,
                 }
               : worker,
           ),
@@ -111,8 +112,7 @@ export const StaffRegistry: React.FC = () => {
         <div className="mb-6 flex items-center justify-between rounded-lg border border-slate-200/60 bg-slate-50 p-5 shadow-sm">
           <div>
             <h1 className="text-xl font-bold uppercase tracking-tight text-[#1a4b8c]">
-              Staff Registry{" "}
-              <span className="text-[#029352]">Center</span>
+              Staff Registry <span className="text-[#029352]">Center</span>
             </h1>
 
             <p className="mt-1 text-xs font-medium leading-relaxed text-slate-500">
@@ -130,8 +130,7 @@ export const StaffRegistry: React.FC = () => {
           <div className="mb-5 flex flex-col gap-3 border-b border-slate-100 pb-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h2 className="text-lg font-bold tracking-tight text-[#1a4b8c]">
-                Hospital Staff{" "}
-                <span className="text-[#029352]">Accounts</span>
+                Hospital Staff <span className="text-[#029352]">Accounts</span>
               </h2>
 
               <p className="mt-0.5 text-xs font-medium text-slate-400">
@@ -148,9 +147,7 @@ export const StaffRegistry: React.FC = () => {
                 title="Refresh Staff Registry"
               >
                 <RefreshCw
-                  className={`h-4 w-4 ${
-                    staffLoading ? "animate-spin" : ""
-                  }`}
+                  className={`h-4 w-4 ${staffLoading ? "animate-spin" : ""}`}
                 />
               </button>
 
@@ -177,40 +174,43 @@ export const StaffRegistry: React.FC = () => {
             </div>
           )}
 
-          {!staffLoading &&
-            !staffError &&
-            staffData.length === 0 && (
-              <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50/50 py-14 text-center">
-                <ShieldCheck className="mx-auto mb-3 h-8 w-8 text-[#029352]" />
+          {!staffLoading && !staffError && staffData.length === 0 && (
+            <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50/50 py-14 text-center">
+              <ShieldCheck className="mx-auto mb-3 h-8 w-8 text-[#029352]" />
 
-                <p className="text-xs font-semibold text-slate-400">
-                  No medical staff accounts found.
-                </p>
+              <p className="text-xs font-semibold text-slate-400">
+                No medical staff accounts found.
+              </p>
 
-                <p className="mt-1 text-xs font-medium text-slate-400">
-                  Click &quot;Add New Practitioner&quot; to create a staff
-                  account.
-                </p>
-              </div>
-            )}
+              <p className="mt-1 text-xs font-medium text-slate-400">
+                Click &quot;Add New Practitioner&quot; to create a staff
+                account.
+              </p>
+            </div>
+          )}
 
-          {!staffLoading &&
-            !staffError &&
-            staffData.length > 0 && (
-              <div className="overflow-x-auto rounded-lg border border-slate-200/60 shadow-inner">
-                <table className="w-full border-collapse text-left">
-                  <thead>
-                    <tr className="border-b border-slate-200/60 bg-slate-50 text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                      <th className="px-4 py-3">Practitioner Name</th>
-                      <th className="px-4 py-3">System Workplace Email</th>
-                      <th className="px-4 py-3">Designated Role</th>
-                      <th className="px-4 py-3">Account Status</th>
-                      <th className="px-4 py-3 text-center">Actions</th>
-                    </tr>
-                  </thead>
+          {!staffLoading && !staffError && staffData.length > 0 && (
+            <div className="overflow-x-auto rounded-lg border border-slate-200/60 shadow-inner">
+              <table className="w-full border-collapse text-left">
+                <thead>
+                  <tr className="border-b border-slate-200/60 bg-slate-50 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                    <th className="px-4 py-3">Practitioner Name</th>
+                    <th className="px-4 py-3">System Workplace Email</th>
+                    <th className="px-4 py-3">Designated Role</th>
+                    <th className="px-4 py-3">Assigned Department</th>
+                    <th className="px-4 py-3">Account Status</th>
+                    <th className="px-4 py-3 text-center">Actions</th>
+                  </tr>
+                </thead>
 
-                  <tbody className="divide-y divide-slate-100 bg-white text-xs font-medium text-slate-600">
-                    {staffData.map((worker: any) => (
+                <tbody className="divide-y divide-slate-100 bg-white text-xs font-medium text-slate-600">
+                  {staffData.map((worker: any) => {
+                    const departmentName =
+                      worker.department?.name || "Not Assigned";
+
+                    const departmentCode = worker.department?.code || "";
+
+                    return (
                       <tr
                         key={worker._id}
                         className="transition-colors hover:bg-[#1a4b8c]/2.5"
@@ -230,6 +230,28 @@ export const StaffRegistry: React.FC = () => {
                         </td>
 
                         <td className="px-4 py-3.5">
+                          {worker.role === "doctor" ? (
+                            worker.department ? (
+                              <span className="inline-flex items-center gap-1.5 rounded border border-[#029352]/20 bg-[#029352]/5 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-[#029352]">
+                                <Building2 className="h-3 w-3" />
+                                <span>
+                                  {departmentName}
+                                  {departmentCode ? ` (${departmentCode})` : ""}
+                                </span>
+                              </span>
+                            ) : (
+                              <span className="rounded border border-amber-200 bg-amber-50 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-amber-700">
+                                Not Assigned
+                              </span>
+                            )
+                          ) : (
+                            <span className="text-[10px] font-medium text-slate-400">
+                              Not Required
+                            </span>
+                          )}
+                        </td>
+
+                        <td className="px-4 py-3.5">
                           <span
                             className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold ${
                               worker.isActive
@@ -245,9 +267,7 @@ export const StaffRegistry: React.FC = () => {
                           <div className="flex items-center justify-center gap-2">
                             <button
                               type="button"
-                              onClick={() =>
-                                handleToggleDutyState(worker._id)
-                              }
+                              onClick={() => handleToggleDutyState(worker._id)}
                               className={`rounded-md p-1.5 transition-colors focus:outline-none ${
                                 worker.isActive
                                   ? "text-amber-500 hover:bg-amber-50"
@@ -268,9 +288,7 @@ export const StaffRegistry: React.FC = () => {
 
                             <button
                               type="button"
-                              onClick={() =>
-                                handleAccountEviction(worker._id)
-                              }
+                              onClick={() => handleAccountEviction(worker._id)}
                               className="rounded-md p-1.5 text-rose-500 transition-colors hover:bg-rose-50 focus:outline-none"
                               title="Delete Account"
                             >
@@ -279,11 +297,12 @@ export const StaffRegistry: React.FC = () => {
                           </div>
                         </td>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       </div>
 

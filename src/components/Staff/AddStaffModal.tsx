@@ -1,6 +1,7 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   X,
   UserPlus,
@@ -8,7 +9,10 @@ import {
   Lock,
   ShieldCheck,
   CheckCircle2,
+  Building2,
+  RefreshCw,
 } from "lucide-react";
+import { hmsServices } from "../../services/apiService";
 
 interface AddStaffModalProps {
   isOpen: boolean;
@@ -25,15 +29,62 @@ export const AddStaffModal: React.FC<AddStaffModalProps> = ({
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [role, setRole] = useState<string>("doctor");
+  const [departmentId, setDepartmentId] = useState<string>("");
+  const [departments, setDepartments] = useState<any[]>([]);
+
   const [loading, setLoading] = useState<boolean>(false);
+  const [departmentsLoading, setDepartmentsLoading] =
+    useState<boolean>(false);
   const [error, setError] = useState<string>("");
+
+  const fetchDepartments = useCallback(async () => {
+    setDepartmentsLoading(true);
+
+    try {
+      const response =
+        await hmsServices.departments.getAllDepartments(true);
+
+      if (response.success) {
+        setDepartments(response.data || []);
+      } else {
+        setDepartments([]);
+      }
+    } catch (err: any) {
+      setDepartments([]);
+      setError(
+        err?.response?.data?.message ||
+          "Failed to load active hospital departments.",
+      );
+    } finally {
+      setDepartmentsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (isOpen && role === "doctor") {
+      fetchDepartments();
+    }
+  }, [fetchDepartments, isOpen, role]);
+
+  useEffect(() => {
+    if (role !== "doctor") {
+      setDepartmentId("");
+    }
+  }, [role]);
 
   if (!isOpen) {
     return null;
   }
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (
+    event: React.FormEvent<HTMLFormElement>,
+  ) => {
     event.preventDefault();
+
+    if (role === "doctor" && !departmentId) {
+      setError("Please select a department for the doctor account.");
+      return;
+    }
 
     setLoading(true);
     setError("");
@@ -44,12 +95,14 @@ export const AddStaffModal: React.FC<AddStaffModalProps> = ({
         email: email.trim().toLowerCase(),
         password,
         role,
+        department: role === "doctor" ? departmentId : undefined,
       });
 
       setName("");
       setEmail("");
       setPassword("");
       setRole("doctor");
+      setDepartmentId("");
     } catch (err: any) {
       setError(
         err?.response?.data?.message ||
@@ -66,6 +119,7 @@ export const AddStaffModal: React.FC<AddStaffModalProps> = ({
     }
 
     setError("");
+    setDepartmentId("");
     onClose();
   };
 
@@ -77,7 +131,6 @@ export const AddStaffModal: React.FC<AddStaffModalProps> = ({
       aria-labelledby="register-staff-title"
     >
       <div className="w-full max-w-md overflow-hidden rounded-lg border border-slate-200/80 bg-white shadow-[0_20px_60px_rgba(15,23,42,0.18)]">
-        {/* Modal Header */}
         <div className="flex items-center justify-between border-b border-slate-200/60 bg-slate-50 px-5 py-4">
           <div className="flex items-center gap-3">
             <div className="rounded-lg border border-emerald-100 bg-[#029352]/10 p-2 text-[#029352]">
@@ -89,7 +142,8 @@ export const AddStaffModal: React.FC<AddStaffModalProps> = ({
                 id="register-staff-title"
                 className="text-sm font-bold uppercase tracking-wide text-[#1a4b8c]"
               >
-                Register Staff <span className="text-[#029352]">Profile</span>
+                Register Staff{" "}
+                <span className="text-[#029352]">Profile</span>
               </h3>
 
               <p className="mt-0.5 text-[10px] font-medium text-slate-400">
@@ -109,7 +163,6 @@ export const AddStaffModal: React.FC<AddStaffModalProps> = ({
           </button>
         </div>
 
-        {/* Registration Form */}
         <form onSubmit={handleSubmit} className="space-y-4 p-5">
           {error && (
             <div className="flex items-start gap-2 rounded-lg border border-rose-100 bg-rose-50 p-3 text-xs font-semibold text-rose-600">
@@ -118,7 +171,6 @@ export const AddStaffModal: React.FC<AddStaffModalProps> = ({
             </div>
           )}
 
-          {/* Full Name */}
           <div>
             <label
               htmlFor="staff-name"
@@ -139,7 +191,6 @@ export const AddStaffModal: React.FC<AddStaffModalProps> = ({
             />
           </div>
 
-          {/* Email */}
           <div>
             <label
               htmlFor="staff-email"
@@ -163,7 +214,6 @@ export const AddStaffModal: React.FC<AddStaffModalProps> = ({
             </div>
           </div>
 
-          {/* Password */}
           <div>
             <label
               htmlFor="staff-password"
@@ -192,7 +242,6 @@ export const AddStaffModal: React.FC<AddStaffModalProps> = ({
             </p>
           </div>
 
-          {/* Staff Role */}
           <div>
             <label
               htmlFor="staff-role"
@@ -234,7 +283,80 @@ export const AddStaffModal: React.FC<AddStaffModalProps> = ({
             </div>
           </div>
 
-          {/* Form Footer */}
+          {role === "doctor" && (
+            <div>
+              <div className="mb-1.5 flex items-center justify-between">
+                <label
+                  htmlFor="staff-department"
+                  className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400"
+                >
+                  <Building2 className="h-3.5 w-3.5 text-[#1a4b8c]" />
+                  <span>Assigned Department</span>
+                </label>
+
+                <button
+                  type="button"
+                  onClick={fetchDepartments}
+                  disabled={departmentsLoading || loading}
+                  className="rounded p-1 text-slate-400 transition-colors hover:bg-[#1a4b8c]/5 hover:text-[#1a4b8c] disabled:cursor-not-allowed disabled:opacity-50"
+                  title="Refresh Departments"
+                >
+                  <RefreshCw
+                    className={`h-3.5 w-3.5 ${
+                      departmentsLoading ? "animate-spin" : ""
+                    }`}
+                  />
+                </button>
+              </div>
+
+              <div className="relative">
+                <Building2 className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#1a4b8c]/60" />
+
+                <select
+                  id="staff-department"
+                  required
+                  value={departmentId}
+                  onChange={(event) => setDepartmentId(event.target.value)}
+                  disabled={departmentsLoading}
+                  className="w-full cursor-pointer appearance-none rounded-lg border border-slate-200/80 bg-slate-50 py-2.5 pl-9 pr-9 text-xs font-bold uppercase tracking-wider text-slate-600 outline-none transition-all focus:border-[#029352] focus:bg-white focus:ring-2 focus:ring-[#029352]/10 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  <option value="">
+                    {departmentsLoading
+                      ? "LOADING DEPARTMENTS..."
+                      : "SELECT DEPARTMENT"}
+                  </option>
+
+                  {departments.map((department: any) => (
+                    <option key={department._id} value={department._id}>
+                      {department.name.toUpperCase()} ({department.code})
+                    </option>
+                  ))}
+                </select>
+
+                <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[#1a4b8c]">
+                  <svg
+                    className="h-3.5 w-3.5"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                    aria-hidden="true"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </span>
+              </div>
+
+              {!departmentsLoading && departments.length === 0 && (
+                <p className="mt-1.5 text-[10px] font-medium text-rose-500">
+                  No active departments found. Create departments first.
+                </p>
+              )}
+            </div>
+          )}
+
           <div className="flex items-center justify-between gap-3 border-t border-slate-100 pt-4">
             <div className="hidden items-center gap-1.5 text-[10px] font-semibold text-[#029352] sm:flex">
               <CheckCircle2 className="h-3.5 w-3.5" />
@@ -253,16 +375,16 @@ export const AddStaffModal: React.FC<AddStaffModalProps> = ({
 
               <button
                 type="submit"
-                disabled={loading}
+                disabled={loading || (role === "doctor" && departmentsLoading)}
                 className="flex min-w-28 items-center justify-center gap-2 rounded-lg bg-[#1a4b8c] px-5 py-2 text-[10px] font-bold uppercase tracking-wider text-white shadow-sm transition-all hover:bg-[#143b6e] focus:outline-none focus:ring-2 focus:ring-[#029352]/30 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {loading ? (
                   <>
-                    <span className="h-4 w-3.5 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                    <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/30 border-t-white" />
                     <span>Saving</span>
                   </>
                 ) : (
-                  <span className="py-0.5 text-[10px]">Register</span>
+                  <span>Register</span>
                 )}
               </button>
             </div>
