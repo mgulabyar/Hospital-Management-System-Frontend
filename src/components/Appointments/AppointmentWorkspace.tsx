@@ -12,6 +12,7 @@ import {
   RefreshCw,
   Search,
   TicketCheck,
+  UserRoundCog,
   UserRoundX,
   X,
 } from "lucide-react";
@@ -102,6 +103,9 @@ export const AppointmentWorkspace: React.FC = () => {
   const [successMsg, setSuccessMsg] = useState<string>("");
   const [errorMsg, setErrorMsg] = useState<string>("");
 
+  const [cancelTarget, setCancelTarget] = useState<any>(null);
+  const [cancellationReason, setCancellationReason] = useState<string>("");
+
   const [rescheduleTarget, setRescheduleTarget] = useState<any>(null);
   const [rescheduleDepartmentId, setRescheduleDepartmentId] =
     useState<string>("");
@@ -118,6 +122,11 @@ export const AppointmentWorkspace: React.FC = () => {
 
   const canManageAppointments =
     user?.role === "super_admin" || user?.role === "receptionist";
+
+  const canViewAppointments =
+    user?.role === "super_admin" ||
+    user?.role === "receptionist" ||
+    user?.role === "doctor";
 
   const showToast = useCallback(
     (message: string, type: "success" | "error") => {
@@ -144,6 +153,27 @@ export const AppointmentWorkspace: React.FC = () => {
 
     return () => window.clearTimeout(timer);
   }, [successMsg, errorMsg]);
+
+  useEffect(() => {
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") {
+        return;
+      }
+
+      if (cancelTarget && !actionLoadingId) {
+        setCancelTarget(null);
+        setCancellationReason("");
+      }
+
+      if (rescheduleTarget && !actionLoadingId) {
+        setRescheduleTarget(null);
+      }
+    };
+
+    document.addEventListener("keydown", handleEscape);
+
+    return () => document.removeEventListener("keydown", handleEscape);
+  }, [cancelTarget, rescheduleTarget, actionLoadingId]);
 
   const fetchBaseData = useCallback(async () => {
     const [patientResponse, departmentResponse] = await Promise.all([
@@ -236,6 +266,7 @@ export const AppointmentWorkspace: React.FC = () => {
     fetchDoctorsByDepartment(departmentId).catch((err: any) => {
       setDoctors([]);
       setDoctorId("");
+
       showToast(
         err?.response?.data?.message ||
           "Failed to load doctors for the selected department.",
@@ -317,26 +348,52 @@ export const AppointmentWorkspace: React.FC = () => {
     }
   };
 
-  const handleCancel = async (appointment: any) => {
-    const cancellationReason = window.prompt(
-      `Cancellation reason for ${appointment.appointmentNumber}:`,
-      "",
-    );
+  const openCancelDialog = (appointment: any) => {
+    setCancellationReason("");
+    setCancelTarget(appointment);
+  };
 
-    if (cancellationReason === null) {
+  const closeCancelDialog = () => {
+    if (actionLoadingId) {
       return;
     }
 
-    setActionLoadingId(appointment._id);
+    setCancelTarget(null);
+    setCancellationReason("");
+  };
+
+  const handleCancelAppointment = async () => {
+    if (!cancelTarget) {
+      return;
+    }
+
+    const trimmedReason = cancellationReason.trim();
+
+    if (!trimmedReason) {
+      showToast("Please provide a cancellation reason.", "error");
+      return;
+    }
+
+    if (trimmedReason.length < 3) {
+      showToast(
+        "Cancellation reason must contain at least 3 characters.",
+        "error",
+      );
+      return;
+    }
+
+    setActionLoadingId(cancelTarget._id);
 
     try {
       const response = await hmsAppointmentServices.cancelAppointment(
-        appointment._id,
-        cancellationReason,
+        cancelTarget._id,
+        trimmedReason,
       );
 
       if (response.success) {
         showToast("Appointment cancelled successfully.", "success");
+        setCancelTarget(null);
+        setCancellationReason("");
         await fetchAppointments();
       }
     } catch (err: any) {
@@ -442,17 +499,30 @@ export const AppointmentWorkspace: React.FC = () => {
     }
   };
 
+  if (!canViewAppointments) {
+    return (
+      <div className="mx-auto max-w-7xl p-6 font-sans antialiased text-slate-700">
+        <div className="rounded-lg border border-rose-200 bg-rose-50 p-6 text-center">
+          <p className="text-sm font-bold text-rose-600">
+            You are not authorized to view appointments.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="mx-auto max-w-7xl p-6 font-sans antialiased text-slate-700">
       {(successMsg || errorMsg) && (
-        <div className="fixed right-6 top-20 z-70 w-[calc(100%-3rem)] max-w-md animate-[fadeIn_0.2s_ease-out]">
+        <div className="pointer-events-none fixed inset-x-0 top-20 z-70 flex justify-center px-4 sm:justify-end sm:px-6">
           <div
-            className={`flex items-start gap-3 rounded-lg border p-4 text-xs font-bold shadow-xl ${
+            className={`pointer-events-auto flex w-full max-w-md items-start gap-3 rounded-lg border p-4 text-xs font-bold shadow-xl ${
               successMsg
                 ? "border-emerald-100 bg-emerald-50 text-[#029352]"
                 : "border-rose-100 bg-rose-50 text-rose-600"
             }`}
             role="alert"
+            aria-live="polite"
           >
             {successMsg ? (
               <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" />
@@ -468,7 +538,7 @@ export const AppointmentWorkspace: React.FC = () => {
                 setSuccessMsg("");
                 setErrorMsg("");
               }}
-              className="ml-auto rounded p-0.5 transition-colors hover:bg-black/5"
+              className="ml-auto rounded-md p-0.5 transition-colors hover:bg-black/5"
               aria-label="Close notification"
             >
               <X className="h-4 w-4" />
@@ -515,78 +585,132 @@ export const AppointmentWorkspace: React.FC = () => {
           <form onSubmit={handleBookAppointment} className="space-y-4">
             <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
               <div>
-                <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                <label className="mb-1 block text-[10px] font-bold uppercase tracking-wide text-slate-400">
                   Patient Profile
                 </label>
 
-                <select
-                  required
-                  value={patientId}
-                  onChange={(event) => setPatientId(event.target.value)}
-                  className="w-full cursor-pointer rounded-md border border-slate-200 bg-slate-50 px-3 py-2.5 text-xs font-bold uppercase text-slate-600 outline-none transition-all focus:border-[#029352] focus:bg-white focus:ring-2 focus:ring-[#029352]/10"
-                >
-                  <option value="">SELECT PATIENT</option>
+                <div className="relative w-full">
+                  <select
+                    required
+                    value={patientId}
+                    onChange={(event) => setPatientId(event.target.value)}
+                    className="w-full cursor-pointer appearance-none rounded-md border border-slate-200 bg-slate-50 py-3 pl-3 pr-10 text-[11px] font-bold uppercase text-slate-500 outline-none transition-all focus:border-[#029352] focus:bg-white focus:ring-2 focus:ring-[#029352]/10"
+                  >
+                    <option value="">SELECT PATIENT</option>
 
-                  {patients.map((patient: any) => (
-                    <option key={patient._id} value={patient._id}>
-                      {(patient.name || "Unknown Patient").toUpperCase()}
-                      {patient.patientId ? ` (${patient.patientId})` : ""}
-                    </option>
-                  ))}
-                </select>
+                    {patients.map((patient: any) => (
+                      <option key={patient._id} value={patient._id}>
+                        {(patient.name || "Unknown Patient").toUpperCase()}
+                        {patient.patientId ? ` (${patient.patientId})` : ""}
+                      </option>
+                    ))}
+                  </select>
+
+                  <div className="pointer-events-none absolute inset-y-0 right-2 flex items-center text-slate-400">
+                    <svg
+                      className="h-4 w-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2.5"
+                        d="M19 9l-7 7-7-7"
+                      />
+                    </svg>
+                  </div>
+                </div>
               </div>
 
               <div>
-                <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                <label className="mb-1 block text-[10px] font-bold uppercase tracking-wide text-slate-400">
                   Clinical Department
                 </label>
 
-                <select
-                  required
-                  value={departmentId}
-                  onChange={(event) => setDepartmentId(event.target.value)}
-                  className="w-full cursor-pointer rounded-md border border-slate-200 bg-slate-50 px-3 py-2.5 text-xs font-bold uppercase text-slate-600 outline-none transition-all focus:border-[#029352] focus:bg-white focus:ring-2 focus:ring-[#029352]/10"
-                >
-                  <option value="">SELECT DEPARTMENT</option>
+                <div className="relative w-full">
+                  <select
+                    required
+                    value={departmentId}
+                    onChange={(event) => setDepartmentId(event.target.value)}
+                    className="w-full cursor-pointer appearance-none rounded-md border border-slate-200 bg-slate-50 py-3 pl-3 pr-10 text-[11px] font-bold uppercase text-slate-500 outline-none transition-all focus:border-[#029352] focus:bg-white focus:ring-2 focus:ring-[#029352]/10"
+                  >
+                    <option value="">SELECT DEPARTMENT</option>
 
-                  {departments.map((department: any) => (
-                    <option key={department._id} value={department._id}>
-                      {department.name.toUpperCase()} ({department.code})
-                    </option>
-                  ))}
-                </select>
+                    {departments.map((department: any) => (
+                      <option key={department._id} value={department._id}>
+                        {department.name.toUpperCase()} ({department.code})
+                      </option>
+                    ))}
+                  </select>
+
+                  <div className="pointer-events-none absolute inset-y-0 right-2 flex items-center text-slate-400">
+                    <svg
+                      className="h-4 w-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2.5"
+                        d="M19 9l-7 7-7-7"
+                      />
+                    </svg>
+                  </div>
+                </div>
               </div>
 
               <div>
-                <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                <label className="mb-1 block text-[10px] font-bold uppercase tracking-wide text-slate-400">
                   Assigned Doctor
                 </label>
 
-                <select
-                  required
-                  value={doctorId}
-                  onChange={(event) => setDoctorId(event.target.value)}
-                  disabled={!departmentId || doctorLoading}
-                  className="w-full cursor-pointer rounded-md border border-slate-200 bg-slate-50 px-3 py-2.5 text-xs font-bold uppercase text-slate-600 outline-none transition-all focus:border-[#029352] focus:bg-white focus:ring-2 focus:ring-[#029352]/10 disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  <option value="">
-                    {!departmentId
-                      ? "SELECT DEPARTMENT FIRST"
-                      : doctorLoading
-                        ? "LOADING DOCTORS..."
-                        : "SELECT DOCTOR"}
-                  </option>
-
-                  {doctors.map((doctor: any) => (
-                    <option key={doctor._id} value={doctor._id}>
-                      {(doctor.name || "Unknown Doctor").toUpperCase()}
+                <div className="relative w-full">
+                  <select
+                    required
+                    value={doctorId}
+                    onChange={(event) => setDoctorId(event.target.value)}
+                    disabled={!departmentId || doctorLoading}
+                    className="w-full cursor-pointer appearance-none rounded-md border border-slate-200 bg-slate-50 py-3 pl-3 pr-10 text-[11px] font-bold uppercase text-slate-500 outline-none transition-all focus:border-[#029352] focus:bg-white focus:ring-2 focus:ring-[#029352]/10 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    <option value="">
+                      {!departmentId
+                        ? "SELECT DEPARTMENT FIRST"
+                        : doctorLoading
+                          ? "LOADING DOCTORS..."
+                          : "SELECT DOCTOR"}
                     </option>
-                  ))}
-                </select>
+
+                    {doctors.map((doctor: any) => (
+                      <option key={doctor._id} value={doctor._id}>
+                        {(doctor.name || "Unknown Doctor").toUpperCase()}
+                      </option>
+                    ))}
+                  </select>
+
+                  <div className="pointer-events-none absolute inset-y-0 right-2 flex items-center text-slate-400">
+                    <svg
+                      className="h-4 w-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2.5"
+                        d="M19 9l-7 7-7-7"
+                      />
+                    </svg>
+                  </div>
+                </div>
               </div>
 
               <div>
-                <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                <label className="mb-1 block text-[10px] font-bold uppercase tracking-wide text-slate-400">
                   Appointment Date
                 </label>
 
@@ -596,12 +720,12 @@ export const AppointmentWorkspace: React.FC = () => {
                   min={getTodayDate()}
                   value={appointmentDate}
                   onChange={(event) => setAppointmentDate(event.target.value)}
-                  className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2.5 text-xs font-semibold text-slate-700 outline-none transition-all focus:border-[#029352] focus:bg-white focus:ring-2 focus:ring-[#029352]/10"
+                  className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-3 text-xs font-semibold text-slate-700 outline-none transition-all focus:border-[#029352] focus:bg-white focus:ring-2 focus:ring-[#029352]/10"
                 />
               </div>
 
               <div>
-                <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                <label className="mb-1 block text-[10px] font-bold uppercase tracking-wide text-slate-400">
                   Appointment Time
                 </label>
 
@@ -610,7 +734,7 @@ export const AppointmentWorkspace: React.FC = () => {
                   required
                   value={appointmentTime}
                   onChange={(event) => setAppointmentTime(event.target.value)}
-                  className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2.5 text-xs font-semibold text-slate-700 outline-none transition-all focus:border-[#029352] focus:bg-white focus:ring-2 focus:ring-[#029352]/10"
+                  className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-3 text-xs font-semibold text-slate-700 outline-none transition-all focus:border-[#029352] focus:bg-white focus:ring-2 focus:ring-[#029352]/10"
                 />
               </div>
 
@@ -618,7 +742,7 @@ export const AppointmentWorkspace: React.FC = () => {
                 <button
                   type="submit"
                   disabled={bookingLoading || doctorLoading}
-                  className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#1a4b8c] px-4 py-2.5 text-[10px] font-bold uppercase tracking-wider text-white shadow-sm transition-all hover:bg-[#143b6e] focus:outline-none focus:ring-2 focus:ring-[#029352]/30 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-md bg-[#1a4b8c] px-4 py-3.5 text-[11px] font-bold uppercase tracking-wider text-white shadow-sm transition-all hover:bg-[#143b6e] focus:outline-none focus:ring-2 focus:ring-[#029352]/30 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {bookingLoading ? (
                     <>
@@ -655,27 +779,33 @@ export const AppointmentWorkspace: React.FC = () => {
       <div className="rounded-lg border border-slate-200/80 bg-white p-5 shadow-sm">
         <div className="mb-5 flex flex-col gap-4 border-b border-slate-100 pb-4">
           <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-lg font-bold tracking-tight text-[#1a4b8c]">
-                Appointment <span className="text-[#029352]">Registry</span>
-              </h2>
+            <div className="flex items-center gap-2">
+              <div className="shrink-0 rounded-lg bg-[#1a4b8c]/10 p-2 text-[#1a4b8c]">
+                <CalendarDays className="h-4 w-4" />
+              </div>
 
-              <p className="mt-0.5 text-xs font-medium text-slate-400">
-                {user?.role === "doctor"
-                  ? "Your scheduled and historical outpatient appointments."
-                  : "Monitor scheduled appointments and reception check-ins."}
-              </p>
+              <div>
+                <h2 className="text-sm font-bold uppercase text-[#1a4b8c]">
+                  Appointment <span className="text-[#029352]">Registry</span>
+                </h2>
+
+                <p className="text-[10px] font-medium leading-relaxed text-slate-500">
+                  {user?.role === "doctor"
+                    ? "Your scheduled and historical outpatient appointments."
+                    : "Monitor scheduled appointments and reception check-ins."}
+                </p>
+              </div>
             </div>
 
             <button
               type="button"
               onClick={syncAppointmentPanel}
               disabled={loading}
-              className="rounded-lg border border-slate-200 p-2 text-slate-400 transition-colors hover:bg-[#1a4b8c]/5 hover:text-[#1a4b8c] disabled:cursor-not-allowed disabled:opacity-50"
+              className="rounded-md border border-slate-200 p-2 text-slate-400 transition-colors hover:bg-[#1a4b8c]/5 hover:text-[#1a4b8c] disabled:cursor-not-allowed disabled:opacity-50"
               title="Refresh Appointment Registry"
             >
               <RefreshCw
-                className={`h-4 w-4 ${loading ? "animate-spin" : ""}`}
+                className={`h-5 w-5 ${loading ? "animate-spin" : ""}`}
               />
             </button>
           </div>
@@ -692,37 +822,73 @@ export const AppointmentWorkspace: React.FC = () => {
                 type="date"
                 value={filterDate}
                 onChange={(event) => setFilterDate(event.target.value)}
-                className="w-full rounded-md border border-slate-200 bg-slate-50 py-2.5 pl-9 pr-3 text-xs font-semibold text-slate-600 outline-none transition-all focus:border-[#029352] focus:bg-white focus:ring-2 focus:ring-[#029352]/10"
+                className="w-full rounded-md border border-slate-200 bg-slate-50 py-3 pl-9 pr-3 text-xs font-semibold text-slate-600 outline-none transition-all focus:border-[#029352] focus:bg-white focus:ring-2 focus:ring-[#029352]/10"
               />
             </div>
 
-            <select
-              value={filterStatus}
-              onChange={(event) => setFilterStatus(event.target.value)}
-              className="w-full cursor-pointer rounded-md border border-slate-200 bg-slate-50 px-3 py-2.5 text-xs font-bold uppercase text-slate-600 outline-none transition-all focus:border-[#029352] focus:bg-white focus:ring-2 focus:ring-[#029352]/10"
-            >
-              <option value="">ALL STATUSES</option>
-              <option value="Scheduled">SCHEDULED</option>
-              <option value="Checked-In">CHECKED-IN</option>
-              <option value="Completed">COMPLETED</option>
-              <option value="Cancelled">CANCELLED</option>
-              <option value="No-Show">NO-SHOW</option>
-            </select>
+            <div className="relative w-full">
+              <select
+                value={filterStatus}
+                onChange={(event) => setFilterStatus(event.target.value)}
+                className="w-full cursor-pointer appearance-none rounded-md border border-slate-200 bg-slate-50 py-3 pl-3 pr-10 text-xs font-bold uppercase text-slate-600 outline-none transition-all focus:border-[#029352] focus:bg-white focus:ring-2 focus:ring-[#029352]/10"
+              >
+                <option value="">ALL STATUSES</option>
+                <option value="Scheduled">SCHEDULED</option>
+                <option value="Checked-In">CHECKED-IN</option>
+                <option value="Completed">COMPLETED</option>
+                <option value="Cancelled">CANCELLED</option>
+                <option value="No-Show">NO-SHOW</option>
+              </select>
+
+              <div className="pointer-events-none absolute inset-y-0 right-2 flex items-center text-slate-400">
+                <svg
+                  className="h-4 w-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2.5"
+                    d="M19 9l-7 7-7-7"
+                  />
+                </svg>
+              </div>
+            </div>
 
             {user?.role !== "doctor" && (
-              <select
-                value={filterDepartment}
-                onChange={(event) => setFilterDepartment(event.target.value)}
-                className="w-full cursor-pointer rounded-md border border-slate-200 bg-slate-50 px-3 py-2.5 text-xs font-bold uppercase text-slate-600 outline-none transition-all focus:border-[#029352] focus:bg-white focus:ring-2 focus:ring-[#029352]/10"
-              >
-                <option value="">ALL DEPARTMENTS</option>
+              <div className="relative w-full">
+                <select
+                  value={filterDepartment}
+                  onChange={(event) => setFilterDepartment(event.target.value)}
+                  className="w-full cursor-pointer appearance-none rounded-md border border-slate-200 bg-slate-50 py-3 pl-3 pr-10 text-xs font-bold uppercase text-slate-600 outline-none transition-all focus:border-[#029352] focus:bg-white focus:ring-2 focus:ring-[#029352]/10"
+                >
+                  <option value="">ALL DEPARTMENTS</option>
 
-                {departments.map((department: any) => (
-                  <option key={department._id} value={department._id}>
-                    {department.name.toUpperCase()}
-                  </option>
-                ))}
-              </select>
+                  {departments.map((department: any) => (
+                    <option key={department._id} value={department._id}>
+                      {department.name.toUpperCase()}
+                    </option>
+                  ))}
+                </select>
+
+                <div className="pointer-events-none absolute inset-y-0 right-2 flex items-center text-slate-400">
+                  <svg
+                    className="h-4 w-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2.5"
+                      d="M19 9l-7 7-7-7"
+                    />
+                  </svg>
+                </div>
+              </div>
             )}
 
             <button
@@ -732,7 +898,7 @@ export const AppointmentWorkspace: React.FC = () => {
                 setFilterStatus("");
                 setFilterDepartment("");
               }}
-              className="flex items-center justify-center gap-2 rounded-md border border-slate-200 bg-slate-50 px-3 py-2.5 text-[10px] font-bold uppercase tracking-wider text-slate-500 transition-colors hover:bg-slate-100"
+              className="flex items-center justify-center gap-2 rounded-md border border-slate-200 bg-slate-50 px-3 py-3 text-[10px] font-bold uppercase tracking-wider text-slate-500 transition-colors hover:bg-slate-100"
             >
               <Search className="h-3.5 w-3.5" />
               Clear Filters
@@ -758,7 +924,7 @@ export const AppointmentWorkspace: React.FC = () => {
 
         {!loading && appointments.length > 0 && (
           <div className="overflow-x-auto rounded-lg border border-slate-200/60">
-            <table className="w-full min-w-245 border-collapse text-left">
+            <table className="w-full min-w-262.5 border-collapse text-left">
               <thead>
                 <tr className="border-b border-slate-200/60 bg-slate-50 text-[10px] font-bold uppercase tracking-wider text-slate-400">
                   <th className="px-4 py-3">Appointment</th>
@@ -767,6 +933,7 @@ export const AppointmentWorkspace: React.FC = () => {
                   <th className="px-4 py-3">Schedule</th>
                   <th className="px-4 py-3">Status</th>
                   <th className="px-4 py-3">Reason</th>
+
                   {canManageAppointments && (
                     <th className="px-4 py-3 text-center">Actions</th>
                   )}
@@ -844,12 +1011,14 @@ export const AppointmentWorkspace: React.FC = () => {
                       </span>
                     </td>
 
-                    <td className="max-w-47.5 px-4 py-3.5 text-[11px] leading-relaxed text-slate-500">
-                      {appointment.reason || "No reason provided"}
+                    <td className="max-w-55 px-4 py-3.5">
+                      <p className="truncate text-[11px] leading-relaxed text-slate-500">
+                        {appointment.reason || "No reason provided"}
+                      </p>
                     </td>
 
                     {canManageAppointments && (
-                      <td className="px-4 py-3.5">
+                      <td className="px-4 py-3.5 text-center">
                         <div className="flex items-center justify-center gap-1.5">
                           {appointment.status === "Scheduled" && (
                             <button
@@ -882,7 +1051,7 @@ export const AppointmentWorkspace: React.FC = () => {
                           ) && (
                             <button
                               type="button"
-                              onClick={() => handleCancel(appointment)}
+                              onClick={() => openCancelDialog(appointment)}
                               disabled={actionLoadingId === appointment._id}
                               title="Cancel Appointment"
                               className="rounded-md p-1.5 text-rose-500 transition-colors hover:bg-rose-50 disabled:cursor-not-allowed disabled:opacity-50"
@@ -901,28 +1070,189 @@ export const AppointmentWorkspace: React.FC = () => {
         )}
       </div>
 
-      {rescheduleTarget && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/45 p-4 font-sans antialiased backdrop-blur-sm">
-          <div className="w-full max-w-md overflow-hidden rounded-lg border border-slate-200/80 bg-white shadow-[0_20px_60px_rgba(15,23,42,0.18)]">
-            <div className="flex items-center justify-between border-b border-slate-200/60 bg-slate-50 px-5 py-4">
-              <div>
-                <h3 className="text-sm font-bold uppercase tracking-wide text-[#1a4b8c]">
-                  Reschedule <span className="text-[#029352]">Appointment</span>
-                </h3>
+      {cancelTarget && (
+        <div
+          className="fixed inset-0 z-60 flex items-center justify-center bg-slate-900/45 p-4 font-sans antialiased backdrop-blur-sm"
+          role="presentation"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) {
+              closeCancelDialog();
+            }
+          }}
+        >
+          <div
+            className="w-full max-w-md overflow-hidden rounded-md border border-slate-200/80 bg-white shadow-[0_20px_60px_rgba(15,23,42,0.18)]"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="cancel-appointment-title"
+          >
+            <div className="flex items-start justify-between border-b border-slate-200/60 bg-slate-50 px-5 py-4">
+              <div className="flex items-start gap-3">
+                <div className="rounded-md bg-[#1a4b8c]/10 p-2.5 text-[#1a4b8c]">
+                  <UserRoundX className="h-5 w-5" />
+                </div>
 
-                <p className="mt-0.5 text-[10px] font-medium text-slate-400">
-                  {rescheduleTarget.appointmentNumber}
+                <div>
+                  <h3
+                    id="cancel-appointment-title"
+                    className="text-sm font-bold uppercase tracking-wide text-[#1a4b8c]"
+                  >
+                    Cancel <span className="text-[#029352]">Appointment</span>
+                  </h3>
+
+                  <p className="mt-1 text-[10px] font-medium leading-relaxed text-slate-500">
+                    {cancelTarget.appointmentNumber} ·{" "}
+                    {cancelTarget.patient?.name || "Unknown Patient"}
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={closeCancelDialog}
+                disabled={actionLoadingId === cancelTarget._id}
+                className="rounded-md p-1.5 text-slate-400 transition-colors hover:bg-[#1a4b8c]/5 hover:text-[#1a4b8c] disabled:cursor-not-allowed disabled:opacity-50"
+                aria-label="Close cancellation dialog"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="space-y-4 p-5">
+              <div className="rounded-md border border-slate-200 bg-slate-50 px-3 py-3">
+                <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">
+                  Appointment Details
                 </p>
+
+                <div className="mt-2 grid grid-cols-1 gap-1 text-xs text-slate-600 sm:grid-cols-2">
+                  <p>
+                    <span className="font-bold text-[#1a4b8c]">Patient:</span>{" "}
+                    {cancelTarget.patient?.name || "Unknown Patient"}
+                  </p>
+
+                  <p>
+                    <span className="font-bold text-[#1a4b8c]">Doctor:</span>{" "}
+                    {cancelTarget.doctor?.name || "Unknown Doctor"}
+                  </p>
+
+                  <p>
+                    <span className="font-bold text-[#1a4b8c]">Date:</span>{" "}
+                    {formatAppointmentDate(cancelTarget.appointmentDate)}
+                  </p>
+
+                  <p>
+                    <span className="font-bold text-[#1a4b8c]">Time:</span>{" "}
+                    {formatTime(cancelTarget.appointmentTime)}
+                  </p>
+                </div>
+              </div>
+
+              <div>
+                <label
+                  htmlFor="cancellation-reason"
+                  className="mb-1.5 block text-[10px] font-bold uppercase tracking-wide text-slate-400"
+                >
+                  Cancellation Reason
+                </label>
+
+                <textarea
+                  id="cancellation-reason"
+                  autoFocus
+                  rows={4}
+                  value={cancellationReason}
+                  onChange={(event) =>
+                    setCancellationReason(event.target.value)
+                  }
+                  placeholder="Please explain why this appointment is being cancelled..."
+                  maxLength={500}
+                  className="w-full resize-none rounded-md border border-slate-200 bg-slate-50 px-3 py-3 text-xs font-medium leading-relaxed text-slate-700 outline-none transition-all placeholder:text-slate-300 focus:border-[#029352] focus:bg-white focus:ring-2 focus:ring-[#029352]/10"
+                />
+
+                <div className="mt-1 flex justify-end">
+                  <span className="text-[10px] font-medium text-slate-400">
+                    {cancellationReason.length}/500
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-2 border-t border-slate-100 pt-4">
+                <button
+                  type="button"
+                  onClick={closeCancelDialog}
+                  disabled={actionLoadingId === cancelTarget._id}
+                  className="rounded-md border border-slate-200 px-4 py-2.5 text-[10px] font-bold uppercase tracking-wider text-slate-500 transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  Keep Appointment
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleCancelAppointment}
+                  disabled={actionLoadingId === cancelTarget._id}
+                  className="flex min-w-37 items-center justify-center gap-2 rounded-md bg-[#1a4b8c] px-4 py-2.5 text-[10px] font-bold uppercase tracking-wider text-white transition-colors hover:bg-[#143b6e] disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {actionLoadingId === cancelTarget._id ? (
+                    <>
+                      <div className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                      <span>Cancelling</span>
+                    </>
+                  ) : (
+                    <span>Confirm Cancellation</span>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {rescheduleTarget && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/45 p-4 font-sans antialiased backdrop-blur-sm"
+          role="presentation"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) {
+              if (!actionLoadingId) {
+                setRescheduleTarget(null);
+              }
+            }
+          }}
+        >
+          <div
+            className="w-full max-w-md overflow-hidden rounded-lg border border-slate-200/80 bg-white shadow-[0_20px_60px_rgba(15,23,42,0.18)]"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="reschedule-appointment-title"
+          >
+            <div className="flex items-center justify-between border-b border-slate-200/60 bg-slate-50 px-5 py-4">
+              <div className="flex items-center gap-2">
+                <div className="shrink-0 rounded-lg bg-[#1a4b8c]/10 p-2.5 text-[#1a4b8c]">
+                  <UserRoundCog className="h-5 w-5" />
+                </div>
+
+                <div>
+                  <h3
+                    id="reschedule-appointment-title"
+                    className="text-sm font-bold uppercase tracking-wide text-[#1a4b8c]"
+                  >
+                    Reschedule{" "}
+                    <span className="text-[#029352]">Appointment</span>
+                  </h3>
+
+                  <p className="mt-0.5 text-[10px] font-medium text-slate-400">
+                    {rescheduleTarget.appointmentNumber}
+                  </p>
+                </div>
               </div>
 
               <button
                 type="button"
                 onClick={() => setRescheduleTarget(null)}
                 disabled={actionLoadingId === rescheduleTarget._id}
-                className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-[#1a4b8c]/5 hover:text-[#1a4b8c]"
+                className="rounded-md p-1.5 text-slate-400 transition-colors hover:bg-[#1a4b8c]/5 hover:text-[#1a4b8c] disabled:cursor-not-allowed disabled:opacity-50"
                 aria-label="Close reschedule modal"
               >
-                <X className="h-4 w-4" />
+                <X className="h-5 w-5" />
               </button>
             </div>
 
@@ -931,59 +1261,95 @@ export const AppointmentWorkspace: React.FC = () => {
               className="space-y-4 p-5"
             >
               <div>
-                <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                <label className="mb-1 block text-[10px] font-bold uppercase tracking-wide text-slate-400">
                   Department
                 </label>
 
-                <select
-                  required
-                  value={rescheduleDepartmentId}
-                  onChange={handleRescheduleDepartmentChange}
-                  className="w-full cursor-pointer rounded-md border border-slate-200 bg-slate-50 px-3 py-2.5 text-xs font-bold uppercase text-slate-600 outline-none transition-all focus:border-[#029352] focus:bg-white focus:ring-2 focus:ring-[#029352]/10"
-                >
-                  <option value="">SELECT DEPARTMENT</option>
+                <div className="relative w-full">
+                  <select
+                    required
+                    value={rescheduleDepartmentId}
+                    onChange={handleRescheduleDepartmentChange}
+                    className="w-full cursor-pointer appearance-none rounded-md border border-slate-200 bg-slate-50 py-3 pl-3 pr-10 text-xs font-bold uppercase text-slate-600 outline-none transition-all focus:border-[#029352] focus:bg-white focus:ring-2 focus:ring-[#029352]/10"
+                  >
+                    <option value="">SELECT DEPARTMENT</option>
 
-                  {departments.map((department: any) => (
-                    <option key={department._id} value={department._id}>
-                      {department.name.toUpperCase()} ({department.code})
-                    </option>
-                  ))}
-                </select>
+                    {departments.map((department: any) => (
+                      <option key={department._id} value={department._id}>
+                        {department.name.toUpperCase()} ({department.code})
+                      </option>
+                    ))}
+                  </select>
+
+                  <div className="pointer-events-none absolute inset-y-0 right-2 flex items-center text-slate-400">
+                    <svg
+                      className="h-4 w-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2.5"
+                        d="M19 9l-7 7-7-7"
+                      />
+                    </svg>
+                  </div>
+                </div>
               </div>
 
               <div>
-                <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                <label className="mb-1 block text-[10px] font-bold uppercase tracking-wide text-slate-400">
                   Doctor
                 </label>
 
-                <select
-                  required
-                  value={rescheduleDoctorId}
-                  onChange={(event) =>
-                    setRescheduleDoctorId(event.target.value)
-                  }
-                  disabled={!rescheduleDepartmentId || doctorLoading}
-                  className="w-full cursor-pointer rounded-md border border-slate-200 bg-slate-50 px-3 py-2.5 text-xs font-bold uppercase text-slate-600 outline-none transition-all focus:border-[#029352] focus:bg-white focus:ring-2 focus:ring-[#029352]/10 disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  <option value="">
-                    {!rescheduleDepartmentId
-                      ? "SELECT DEPARTMENT FIRST"
-                      : doctorLoading
-                        ? "LOADING DOCTORS..."
-                        : "SELECT DOCTOR"}
-                  </option>
-
-                  {doctors.map((doctor: any) => (
-                    <option key={doctor._id} value={doctor._id}>
-                      {(doctor.name || "Unknown Doctor").toUpperCase()}
+                <div className="relative w-full">
+                  <select
+                    required
+                    value={rescheduleDoctorId}
+                    onChange={(event) =>
+                      setRescheduleDoctorId(event.target.value)
+                    }
+                    disabled={!rescheduleDepartmentId || doctorLoading}
+                    className="w-full cursor-pointer appearance-none rounded-md border border-slate-200 bg-slate-50 py-3 pl-3 pr-10 text-xs font-bold uppercase text-slate-600 outline-none transition-all focus:border-[#029352] focus:bg-white focus:ring-2 focus:ring-[#029352]/10 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    <option value="">
+                      {!rescheduleDepartmentId
+                        ? "SELECT DEPARTMENT FIRST"
+                        : doctorLoading
+                          ? "LOADING DOCTORS..."
+                          : "SELECT DOCTOR"}
                     </option>
-                  ))}
-                </select>
+
+                    {doctors.map((doctor: any) => (
+                      <option key={doctor._id} value={doctor._id}>
+                        {(doctor.name || "Unknown Doctor").toUpperCase()}
+                      </option>
+                    ))}
+                  </select>
+
+                  <div className="pointer-events-none absolute inset-y-0 right-2 flex items-center text-slate-400">
+                    <svg
+                      className="h-4 w-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2.5"
+                        d="M19 9l-7 7-7-7"
+                      />
+                    </svg>
+                  </div>
+                </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <div>
-                  <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                  <label className="mb-1 block text-[10px] font-bold uppercase tracking-wide text-slate-400">
                     New Date
                   </label>
 
@@ -993,12 +1359,12 @@ export const AppointmentWorkspace: React.FC = () => {
                     min={getTodayDate()}
                     value={rescheduleDate}
                     onChange={(event) => setRescheduleDate(event.target.value)}
-                    className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2.5 text-xs font-semibold text-slate-700 outline-none focus:border-[#029352] focus:bg-white focus:ring-2 focus:ring-[#029352]/10"
+                    className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-3 text-xs font-semibold text-slate-700 outline-none focus:border-[#029352] focus:bg-white focus:ring-2 focus:ring-[#029352]/10"
                   />
                 </div>
 
                 <div>
-                  <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                  <label className="mb-1 block text-[10px] font-bold uppercase tracking-wide text-slate-400">
                     New Time
                   </label>
 
@@ -1007,13 +1373,13 @@ export const AppointmentWorkspace: React.FC = () => {
                     required
                     value={rescheduleTime}
                     onChange={(event) => setRescheduleTime(event.target.value)}
-                    className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2.5 text-xs font-semibold text-slate-700 outline-none focus:border-[#029352] focus:bg-white focus:ring-2 focus:ring-[#029352]/10"
+                    className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-3 text-xs font-semibold text-slate-700 outline-none focus:border-[#029352] focus:bg-white focus:ring-2 focus:ring-[#029352]/10"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                <label className="mb-1 block text-[10px] font-bold uppercase tracking-wide text-slate-400">
                   Reschedule Reason
                 </label>
 
@@ -1031,7 +1397,7 @@ export const AppointmentWorkspace: React.FC = () => {
                   type="button"
                   onClick={() => setRescheduleTarget(null)}
                   disabled={actionLoadingId === rescheduleTarget._id}
-                  className="rounded-lg border border-slate-200 px-4 py-2 text-[10px] font-bold uppercase tracking-wider text-slate-500 transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="cursor-pointer rounded-md border border-slate-200 px-4 py-2.5 text-[10px] font-bold uppercase tracking-wider text-slate-500 transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   Cancel
                 </button>
@@ -1041,7 +1407,7 @@ export const AppointmentWorkspace: React.FC = () => {
                   disabled={
                     actionLoadingId === rescheduleTarget._id || doctorLoading
                   }
-                  className="flex min-w-31 items-center justify-center gap-2 rounded-lg bg-[#1a4b8c] px-4 py-2 text-[10px] font-bold uppercase tracking-wider text-white transition-colors hover:bg-[#143b6e] disabled:cursor-not-allowed disabled:opacity-60"
+                  className="flex min-w-31 cursor-pointer items-center justify-center gap-2 rounded-md bg-[#1a4b8c] px-4 py-2.5 text-[10px] font-bold uppercase tracking-wider text-white transition-colors hover:bg-[#143b6e] disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {actionLoadingId === rescheduleTarget._id ? (
                     <>

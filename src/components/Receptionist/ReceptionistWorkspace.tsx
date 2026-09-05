@@ -1,6 +1,5 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-
 import React, { useCallback, useEffect, useState } from "react";
 import {
   UserPlus,
@@ -27,8 +26,7 @@ export const ReceptionistWorkspace: React.FC = () => {
   const [departments, setDepartments] = useState<any[]>([]);
 
   const [loading, setLoading] = useState<boolean>(false);
-  const [departmentLoading, setDepartmentLoading] =
-    useState<boolean>(false);
+  const [departmentLoading, setDepartmentLoading] = useState<boolean>(false);
   const [doctorLoading, setDoctorLoading] = useState<boolean>(false);
 
   const [patientBtnLoading, setPatientBtnLoading] = useState<boolean>(false);
@@ -46,8 +44,7 @@ export const ReceptionistWorkspace: React.FC = () => {
   const [emergencyPhone, setEmergencyPhone] = useState<string>("");
 
   const [selectedPatientId, setSelectedPatientId] = useState<string>("");
-  const [selectedDepartmentId, setSelectedDepartmentId] =
-    useState<string>("");
+  const [selectedDepartmentId, setSelectedDepartmentId] = useState<string>("");
   const [selectedDoctorId, setSelectedDoctorId] = useState<string>("");
   const [department, setDepartment] = useState<string>("");
 
@@ -60,8 +57,7 @@ export const ReceptionistWorkspace: React.FC = () => {
   const [errorMsg, setErrorMsg] = useState<string>("");
 
   const fetchPatients = useCallback(async () => {
-    const patientResponse =
-      await hmsReceptionServices.getRegisteredPatients();
+    const patientResponse = await hmsReceptionServices.getRegisteredPatients();
 
     if (patientResponse.success) {
       setPatients(patientResponse.data || []);
@@ -85,33 +81,30 @@ export const ReceptionistWorkspace: React.FC = () => {
     }
   }, []);
 
-  const fetchDoctorsByDepartment = useCallback(
-    async (departmentId: string) => {
-      if (!departmentId) {
+  const fetchDoctorsByDepartment = useCallback(async (departmentId: string) => {
+    if (!departmentId) {
+      setDoctors([]);
+      return;
+    }
+
+    setDoctorLoading(true);
+
+    try {
+      const doctorResponse = await hmsServices.staff.getAllStaff(
+        "doctor",
+        departmentId,
+        true,
+      );
+
+      if (doctorResponse.success) {
+        setDoctors(doctorResponse.data || []);
+      } else {
         setDoctors([]);
-        return;
       }
-
-      setDoctorLoading(true);
-
-      try {
-        const doctorResponse = await hmsServices.staff.getAllStaff(
-          "doctor",
-          departmentId,
-          true,
-        );
-
-        if (doctorResponse.success) {
-          setDoctors(doctorResponse.data || []);
-        } else {
-          setDoctors([]);
-        }
-      } finally {
-        setDoctorLoading(false);
-      }
-    },
-    [],
-  );
+    } finally {
+      setDoctorLoading(false);
+    }
+  }, []);
 
   const syncReceptionPanelData = useCallback(async () => {
     setLoading(true);
@@ -121,8 +114,7 @@ export const ReceptionistWorkspace: React.FC = () => {
       await Promise.all([fetchPatients(), fetchDepartments()]);
     } catch (err: any) {
       setErrorMsg(
-        err?.response?.data?.message ||
-          "Failed to sync reception panel data.",
+        err?.response?.data?.message || "Failed to sync reception panel data.",
       );
     } finally {
       setLoading(false);
@@ -260,8 +252,7 @@ export const ReceptionistWorkspace: React.FC = () => {
       if (response.success && response.data) {
         setSuccessMsg(
           `Success: OPD Entry Token ${
-            response.data.displayToken ||
-            `#${response.data.tokenNumber}`
+            response.data.displayToken || `#${response.data.tokenNumber}`
           } issued successfully.`,
         );
 
@@ -319,7 +310,7 @@ export const ReceptionistWorkspace: React.FC = () => {
         <div className="rounded-lg border border-slate-200/80 bg-white p-5 shadow-sm">
           <div className="mb-4 flex items-center gap-2 border-b border-slate-100 pb-3">
             <div className="rounded-lg bg-[#1a4b8c]/10 p-2 text-[#1a4b8c]">
-              <UserPlus className="h-4 w-4" />
+              <UserPlus className="h-5 w-5" />
             </div>
 
             <div>
@@ -336,7 +327,7 @@ export const ReceptionistWorkspace: React.FC = () => {
           <form onSubmit={handleRegisterPatientForm} className="space-y-4">
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
-                <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                <label className="mb-1 block text-[10px] font-bold uppercase text-slate-400">
                   Patient Name
                 </label>
 
@@ -351,7 +342,7 @@ export const ReceptionistWorkspace: React.FC = () => {
               </div>
 
               <div>
-                <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                <label className="mb-1 block text-[10px] tracking-wide font-bold uppercase  text-slate-400">
                   Contact Phone
                 </label>
 
@@ -368,7 +359,7 @@ export const ReceptionistWorkspace: React.FC = () => {
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="font-sans antialiased">
-                <label className="mb-1 flex items-center gap-1 text-[11px] font-bold uppercase tracking-wide text-slate-400 select-none">
+                <label className="mb-1 flex items-center gap-1 text-[10px] tracking-wide font-bold uppercase text-slate-400 select-none">
                   <CreditCard className="h-3 w-3 text-[#1a4b8c]" />
                   <span>CNIC / Passport</span>
                 </label>
@@ -380,7 +371,6 @@ export const ReceptionistWorkspace: React.FC = () => {
                   onChange={(event) => {
                     const rawValue = event.target.value;
                     const digitsOnly = rawValue.replace(/\D/g, "");
-
                     // eslint-disable-next-line no-useless-assignment
                     let maskedValue = "";
 
@@ -413,7 +403,7 @@ export const ReceptionistWorkspace: React.FC = () => {
               </div>
 
               <div className="font-sans antialiased">
-                <label className="mb-1 flex items-center gap-1 text-[11px] font-bold uppercase tracking-wide text-slate-400 select-none">
+                <label className="mb-1 flex items-center gap-1 text-[10px] tracking-wide font-bold uppercase text-slate-400 select-none">
                   <Droplet className="h-3 w-3 text-[#029352]" />
                   <span>Blood Group</span>
                 </label>
@@ -422,7 +412,7 @@ export const ReceptionistWorkspace: React.FC = () => {
                   <select
                     value={bloodGroup}
                     onChange={(event) => setBloodGroup(event.target.value)}
-                    className="w-full cursor-pointer appearance-none rounded-md border border-slate-200 bg-slate-50 py-2.5 pl-3 pr-10 text-xs font-bold uppercase tracking-wide text-slate-600 outline-none transition-all duration-200 focus:border-[#1a4b8c] focus:bg-white focus:ring-2 focus:ring-[#1a4b8c]/10 shadow-sm"
+                    className="w-full cursor-pointer appearance-none rounded-md border border-slate-200 bg-slate-50 py-2.5 pl-3 pr-10 text-[11px] font-bold uppercase text-slate-500 outline-none transition-all duration-200 focus:border-[#1a4b8c] focus:bg-white focus:ring-2 focus:ring-[#1a4b8c]/10 shadow-sm"
                   >
                     <option value="O+">O Pos (O+)</option>
                     <option value="O-">O Neg (O-)</option>
@@ -455,7 +445,7 @@ export const ReceptionistWorkspace: React.FC = () => {
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
-                <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                <label className="mb-1 block text-[10px] tracking-wide font-bold uppercase text-slate-400">
                   Age (Years)
                 </label>
 
@@ -472,7 +462,7 @@ export const ReceptionistWorkspace: React.FC = () => {
               </div>
 
               <div className="font-sans antialiased">
-                <label className="mb-1 block text-[11px] font-bold uppercase tracking-wide text-slate-400 select-none">
+                <label className="mb-1 block text-[10px] tracking-wide font-bold uppercase text-slate-400 select-none">
                   Gender Specification
                 </label>
 
@@ -480,7 +470,7 @@ export const ReceptionistWorkspace: React.FC = () => {
                   <select
                     value={gender}
                     onChange={(event) => setGender(event.target.value)}
-                    className="w-full cursor-pointer appearance-none rounded-md border border-slate-200 bg-slate-50 py-2.5 pl-3 pr-10 text-xs font-bold uppercase tracking-wide text-slate-500 outline-none transition-all duration-200 focus:border-[#1a4b8c] focus:bg-white focus:ring-2 focus:ring-[#1a4b8c]/10 shadow-sm"
+                    className="w-full cursor-pointer appearance-none rounded-md border border-slate-200 bg-slate-50 py-2.5 pl-3 pr-10 text-[11px] font-bold uppercase tracking-wide text-slate-500 outline-none transition-all duration-200 focus:border-[#1a4b8c] focus:bg-white focus:ring-2 focus:ring-[#1a4b8c]/10 shadow-sm"
                   >
                     <option value="Male">MALE</option>
                     <option value="Female">FEMALE</option>
@@ -507,7 +497,7 @@ export const ReceptionistWorkspace: React.FC = () => {
             </div>
 
             <div>
-              <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-slate-400">
+              <label className="mb-1 block text-[10px] font-bold uppercase tracking-wide text-slate-400">
                 Permanent Residential Address
               </label>
 
@@ -525,7 +515,7 @@ export const ReceptionistWorkspace: React.FC = () => {
               <div className="mb-3 flex items-center gap-2">
                 <ClipboardCheck className="h-4 w-4 text-[#1a4b8c]" />
 
-                <h4 className="text-[10px] font-bold uppercase tracking-wider text-[#1a4b8c]">
+                <h4 className="text-[10px] font-bold uppercase tracking-wide text-[#1a4b8c]">
                   Emergency Contact Node
                 </h4>
               </div>
@@ -584,9 +574,7 @@ export const ReceptionistWorkspace: React.FC = () => {
                     type="tel"
                     required
                     value={emergencyPhone}
-                    onChange={(event) =>
-                      setEmergencyPhone(event.target.value)
-                    }
+                    onChange={(event) => setEmergencyPhone(event.target.value)}
                     placeholder="0300-XXXXXXX"
                     className="w-full rounded-md border border-slate-200 bg-white px-2 py-2.5 text-center text-xs font-semibold text-slate-700 outline-none transition-colors placeholder:text-slate-300 focus:border-[#029352]"
                   />
@@ -623,7 +611,7 @@ export const ReceptionistWorkspace: React.FC = () => {
           <div className="mb-4 flex items-center justify-between border-b border-slate-100 pb-3">
             <div className="flex items-center gap-2">
               <div className="rounded-lg bg-[#029352]/10 p-2 text-[#029352]">
-                <Ticket className="h-4 w-4" />
+                <Ticket className="h-5 w-5" />
               </div>
 
               <div>
@@ -641,11 +629,11 @@ export const ReceptionistWorkspace: React.FC = () => {
               type="button"
               onClick={syncReceptionPanelData}
               disabled={loading || departmentLoading || doctorLoading}
-              className="rounded-lg border border-slate-200 p-2 text-slate-400 transition-colors hover:bg-[#1a4b8c]/5 hover:text-[#1a4b8c] disabled:cursor-not-allowed disabled:opacity-50"
+              className="rounded-md border border-slate-200 p-2 text-slate-400 transition-colors hover:bg-[#1a4b8c]/5 hover:text-[#1a4b8c] disabled:cursor-not-allowed disabled:opacity-50"
               title="Refresh Patients, Departments and Doctors"
             >
               <RefreshCw
-                className={`h-4 w-4 ${
+                className={`h-5 w-5 ${
                   loading || departmentLoading || doctorLoading
                     ? "animate-spin"
                     : ""
@@ -656,7 +644,7 @@ export const ReceptionistWorkspace: React.FC = () => {
 
           <form onSubmit={handleIssueTokenTicketForm} className="space-y-4">
             <div className="font-sans antialiased">
-              <label className="mb-1 block text-[11px] font-bold uppercase tracking-wide text-slate-400 select-none">
+              <label className="mb-1 block text-[10px] font-bold uppercase tracking-wide text-slate-400 select-none">
                 Target Patient Profile
               </label>
 
@@ -665,7 +653,7 @@ export const ReceptionistWorkspace: React.FC = () => {
                   required
                   value={selectedPatientId}
                   onChange={(event) => setSelectedPatientId(event.target.value)}
-                  className="w-full cursor-pointer appearance-none rounded-md border border-slate-200 bg-slate-50 py-2.5 pl-3 pr-10 text-xs font-bold uppercase text-slate-600 outline-none transition-all duration-200 focus:border-[#029352] focus:bg-white focus:ring-2 focus:ring-[#029352]/10 shadow-sm"
+                  className="w-full cursor-pointer appearance-none rounded-md border border-slate-200 bg-slate-50 py-2.5 pl-3 pr-10 text-[11px] font-bold uppercase text-slate-500 outline-none transition-all duration-200 focus:border-[#029352] focus:bg-white focus:ring-2 focus:ring-[#029352]/10 shadow-sm"
                 >
                   <option value="">SELECT PATIENT</option>
 
@@ -697,7 +685,7 @@ export const ReceptionistWorkspace: React.FC = () => {
 
             <div className="space-y-4 font-sans antialiased">
               <div>
-                <label className="mb-1 block text-[11px] font-bold uppercase tracking-wide text-slate-400 select-none">
+                <label className="mb-1 block text-[10px] tracking-wide font-bold uppercase text-slate-400 select-none">
                   Clinical Department
                 </label>
 
@@ -707,7 +695,7 @@ export const ReceptionistWorkspace: React.FC = () => {
                     value={selectedDepartmentId}
                     onChange={handleDepartmentChange}
                     disabled={departmentLoading}
-                    className="w-full cursor-pointer appearance-none rounded-md border border-slate-200 bg-slate-50 py-2.5 pl-3 pr-10 text-xs font-bold uppercase text-slate-600 outline-none transition-all duration-200 focus:border-[#029352] focus:bg-white focus:ring-2 focus:ring-[#029352]/10 shadow-sm disabled:cursor-not-allowed disabled:opacity-60"
+                    className="w-full cursor-pointer appearance-none rounded-md border border-slate-200 bg-slate-50 py-2.5 pl-3 pr-10 text-[11px] font-bold uppercase text-slate-500 outline-none transition-all duration-200 focus:border-[#029352] focus:bg-white focus:ring-2 focus:ring-[#029352]/10 shadow-sm disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     <option value="">
                       {departmentLoading
@@ -745,7 +733,7 @@ export const ReceptionistWorkspace: React.FC = () => {
               </div>
 
               <div>
-                <label className="mb-1 block text-[11px] font-bold uppercase tracking-wide text-slate-400 select-none">
+                <label className="mb-1 block text-[10px] tracking-wide font-bold uppercase text-slate-400 select-none">
                   Assigned Practitioner
                 </label>
 
@@ -757,7 +745,7 @@ export const ReceptionistWorkspace: React.FC = () => {
                       setSelectedDoctorId(event.target.value)
                     }
                     disabled={!selectedDepartmentId || doctorLoading}
-                    className="w-full cursor-pointer appearance-none rounded-md border border-slate-200 bg-slate-50 py-2.5 pl-3 pr-10 text-xs font-bold uppercase text-slate-600 outline-none transition-all duration-200 focus:border-[#029352] focus:bg-white focus:ring-2 focus:ring-[#029352]/10 shadow-sm disabled:cursor-not-allowed disabled:opacity-60"
+                    className="w-full cursor-pointer appearance-none rounded-md border border-slate-200 bg-slate-50 py-2.5 pl-3 pr-10 text-[11px] font-bold uppercase text-slate-500 outline-none transition-all duration-200 focus:border-[#029352] focus:bg-white focus:ring-2 focus:ring-[#029352]/10 shadow-sm disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     <option value="">
                       {!selectedDepartmentId
@@ -794,7 +782,7 @@ export const ReceptionistWorkspace: React.FC = () => {
             </div>
 
             <div>
-              <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-slate-400">
+              <label className="mb-1 block text-[10px] tracking-wide font-bold uppercase text-slate-400">
                 Patient Blood Pressure (BP)
               </label>
 
