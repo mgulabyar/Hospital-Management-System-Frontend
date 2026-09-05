@@ -25,9 +25,7 @@ apiClient.interceptors.request.use(
 
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  },
+  (error) => Promise.reject(error),
 );
 
 export const hmsServices = {
@@ -39,8 +37,13 @@ export const hmsServices = {
   },
 
   billing: {
-    getDashboardAnalytics: async () => {
-      const response = await apiClient.get("/billing/dashboard-analytics");
+    getDashboardAnalytics: async (date?: string) => {
+      const response = await apiClient.get(
+        date
+          ? `/billing/dashboard-analytics?date=${encodeURIComponent(date)}`
+          : "/billing/dashboard-analytics",
+      );
+
       return response.data;
     },
   },
