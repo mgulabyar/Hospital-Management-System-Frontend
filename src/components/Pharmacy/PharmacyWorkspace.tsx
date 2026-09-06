@@ -10,6 +10,7 @@ import {
   PackagePlus,
   Pill,
   Plus,
+  Receipt,
   RefreshCw,
   Search,
   ShoppingCart,
@@ -420,7 +421,7 @@ export const PharmacyWorkspace: React.FC = () => {
       {(successMsg || errorMsg) && (
         <div className="fixed right-6 top-20 z-70 w-[calc(100%-3rem)] max-w-md">
           <div
-            className={`flex items-start gap-3 rounded-lg border p-4 text-xs font-bold shadow-xl ${
+            className={`flex items-start gap-3 rounded-lg border p-4 text-xs shadow-xl ${
               successMsg
                 ? "border-emerald-100 bg-emerald-50 text-[#029352]"
                 : "border-rose-100 bg-rose-50 text-rose-600"
@@ -467,10 +468,10 @@ export const PharmacyWorkspace: React.FC = () => {
             type="button"
             onClick={syncPharmacyData}
             disabled={loading}
-            className="rounded-lg border border-slate-200 bg-white p-2 text-slate-400 transition-colors hover:bg-[#1a4b8c]/5 hover:text-[#1a4b8c] disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded-lg border border-slate-200 bg-white p-2.5 text-slate-400 transition-colors hover:bg-[#1a4b8c]/5 hover:text-[#1a4b8c] disabled:cursor-not-allowed disabled:opacity-50"
             title="Refresh Pharmacy Data"
           >
-            <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
+            <RefreshCw className={`h-5 w-5 ${loading ? "animate-spin" : ""}`} />
           </button>
 
           <div className="shrink-0 rounded-lg border border-emerald-100 bg-[#029352]/10 p-2.5 text-[#029352]">
@@ -482,8 +483,8 @@ export const PharmacyWorkspace: React.FC = () => {
       <div className="mb-6 grid grid-cols-1 gap-6 xl:grid-cols-[390px_1fr]">
         <div className="rounded-lg border border-slate-200/80 bg-white p-5 shadow-sm">
           <div className="mb-4 flex items-center gap-2 border-b border-slate-100 pb-3">
-            <div className="rounded-lg bg-[#1a4b8c]/10 p-2 text-[#1a4b8c]">
-              <PackagePlus className="h-4 w-4" />
+            <div className="rounded-md bg-[#1a4b8c]/10 p-2 text-[#1a4b8c]">
+              <PackagePlus className="h-5 w-5" />
             </div>
 
             <div>
@@ -499,7 +500,7 @@ export const PharmacyWorkspace: React.FC = () => {
 
           <form onSubmit={handleAddStockSubmit} className="space-y-4">
             <div>
-              <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-slate-400">
+              <label className="mb-1 block text-[10px] font-bold uppercase tracking-wide text-slate-400">
                 Medicine Brand Name
               </label>
 
@@ -515,24 +516,40 @@ export const PharmacyWorkspace: React.FC = () => {
 
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div>
-                <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                <label className="mb-1 block text-[10px] font-bold uppercase tracking-wide text-slate-400">
                   Formulation
                 </label>
-
-                <select
-                  value={category}
-                  onChange={(event) => setCategory(event.target.value)}
-                  className="w-full cursor-pointer rounded-md border border-slate-200 bg-slate-50 px-3 py-2.5 text-xs font-bold uppercase tracking-wide text-slate-600 outline-none transition-all focus:border-[#1a4b8c] focus:bg-white focus:ring-2 focus:ring-[#1a4b8c]/10"
-                >
-                  <option value="Tablet">TABLET</option>
-                  <option value="Capsule">CAPSULE</option>
-                  <option value="Syrup">SYRUP</option>
-                  <option value="Injection">INJECTION</option>
-                  <option value="Drops">DROPS</option>
-                  <option value="Cream">CREAM</option>
-                  <option value="Ointment">OINTMENT</option>
-                  <option value="Other">OTHER</option>
-                </select>
+                <div className="relative w-full">
+                  <select
+                    value={category}
+                    onChange={(event) => setCategory(event.target.value)}
+                    className="w-full cursor-pointer rounded-md border border-slate-200 bg-slate-50 pl-3 pr-10 py-2.5 text-[11px] font-bold uppercase tracking-wide text-slate-500 outline-none transition-all focus:border-[#1a4b8c] focus:bg-white focus:ring-2 focus:ring-[#1a4b8c]/10 appearance-none"
+                  >
+                    <option value="Tablet">TABLET</option>
+                    <option value="Capsule">CAPSULE</option>
+                    <option value="Syrup">SYRUP</option>
+                    <option value="Injection">INJECTION</option>
+                    <option value="Drops">DROPS</option>
+                    <option value="Cream">CREAM</option>
+                    <option value="Ointment">OINTMENT</option>
+                    <option value="Other">OTHER</option>
+                  </select>
+                  <div className="absolute inset-y-0 right-2 flex items-center pointer-events-none text-slate-400">
+                    <svg
+                      className="w-3.5 h-3.5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2.5"
+                        d="M19 9l-7 7-7-7"
+                      />
+                    </svg>
+                  </div>
+                </div>
               </div>
 
               <div>
@@ -639,8 +656,8 @@ export const PharmacyWorkspace: React.FC = () => {
         <div className="rounded-lg border border-slate-200/80 bg-white p-5 shadow-sm">
           <div className="mb-4 flex flex-col gap-3 border-b border-slate-100 pb-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-2">
-              <div className="rounded-lg bg-[#029352]/10 p-2 text-[#029352]">
-                <ClipboardList className="h-4 w-4" />
+              <div className="rounded-md bg-[#029352]/10 p-2 text-[#029352]">
+                <ClipboardList className="h-5 w-5" />
               </div>
 
               <div>
@@ -739,14 +756,20 @@ export const PharmacyWorkspace: React.FC = () => {
 
       <div className="mb-6 rounded-lg border border-slate-200/80 bg-white p-5 shadow-sm">
         <div className="mb-4 flex flex-col gap-3 border-b border-slate-100 pb-3 md:flex-row md:items-center md:justify-between">
-          <div>
-            <h3 className="text-sm font-bold uppercase tracking-wide text-[#1a4b8c]">
-              Medicine <span className="text-[#029352]">Inventory</span>
-            </h3>
+          <div className="flex items-center gap-2">
+            <div className="rounded-md bg-[#029352]/10 p-2 text-[#029352] shrink-0">
+              <Pill className="h-5 w-5" />
+            </div>
 
-            <p className="mt-0.5 text-[10px] font-medium text-slate-400">
-              Live stock catalog, expiry information, and reorder alerts.
-            </p>
+            <div>
+              <h3 className="text-sm font-bold uppercase tracking-wide text-[#1a4b8c]">
+                Medicine <span className="text-[#029352]">Inventory</span>
+              </h3>
+
+              <p className="mt-0.5 text-[10px] font-medium text-slate-400">
+                Live stock catalog, expiry information, and reorder alerts.
+              </p>
+            </div>
           </div>
 
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
@@ -896,14 +919,20 @@ export const PharmacyWorkspace: React.FC = () => {
 
       <div className="rounded-lg border border-slate-200/80 bg-white p-5 shadow-sm">
         <div className="mb-4 flex items-center justify-between border-b border-slate-100 pb-3">
-          <div>
-            <h3 className="text-sm font-bold uppercase tracking-wide text-[#1a4b8c]">
-              Dispensing <span className="text-[#029352]">History</span>
-            </h3>
+          <div className="flex items-center gap-2">
+            <div className="rounded-md bg-[#1a4b8c]/10 p-2 text-[#1a4b8c] shrink-0">
+              <Receipt className="h-5 w-5" />
+            </div>
 
-            <p className="mt-0.5 text-[10px] font-medium text-slate-400">
-              Completed pharmacy receipts and patient dispensing records.
-            </p>
+            <div>
+              <h3 className="text-sm font-bold uppercase tracking-wide text-[#1a4b8c]">
+                Dispensing <span className="text-[#029352]">History</span>
+              </h3>
+
+              <p className="mt-0.5 text-[10px] font-medium text-slate-400">
+                Completed pharmacy receipts and patient dispensing records.
+              </p>
+            </div>
           </div>
 
           <span className="rounded-full border border-[#1a4b8c]/15 bg-[#1a4b8c]/5 px-2.5 py-1 text-[10px] font-bold text-[#1a4b8c]">
@@ -1006,8 +1035,8 @@ export const PharmacyWorkspace: React.FC = () => {
           <div className="flex max-h-[90vh] w-full max-w-3xl flex-col overflow-hidden rounded-lg border border-slate-200/80 bg-white shadow-[0_20px_60px_rgba(15,23,42,0.18)]">
             <div className="flex items-center justify-between border-b border-slate-200/60 bg-slate-50 px-5 py-4">
               <div className="flex items-center gap-3">
-                <div className="rounded-lg border border-emerald-100 bg-[#029352]/10 p-2 text-[#029352]">
-                  <ShoppingCart className="h-4 w-4" />
+                <div className="rounded-md border border-emerald-100 bg-[#029352]/10 p-2 text-[#029352]">
+                  <ShoppingCart className="h-5 w-5" />
                 </div>
 
                 <div>
@@ -1030,7 +1059,7 @@ export const PharmacyWorkspace: React.FC = () => {
                 className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-[#1a4b8c]/5 hover:text-[#1a4b8c] disabled:cursor-not-allowed disabled:opacity-50"
                 aria-label="Close prescription dispensing modal"
               >
-                <X className="h-4 w-4" />
+                <X className="h-5 w-5" />
               </button>
             </div>
 
@@ -1039,7 +1068,7 @@ export const PharmacyWorkspace: React.FC = () => {
               className="custom-scrollbar overflow-y-auto p-5"
             >
               <div className="mb-4 rounded-lg border border-[#1a4b8c]/10 bg-[#1a4b8c]/2.5 p-3">
-                <p className="mb-2 text-[9px] font-bold uppercase tracking-wider text-slate-400">
+                <p className="mb-2 text-[10px] font-bold uppercase tracking-wider text-slate-400">
                   Doctor Prescription
                 </p>
 
@@ -1048,7 +1077,7 @@ export const PharmacyWorkspace: React.FC = () => {
                     (medicine: any, index: number) => (
                       <span
                         key={`${medicine.name}-${index}`}
-                        className="rounded-md border border-[#1a4b8c]/10 bg-white px-2 py-1 text-[10px] font-semibold text-[#1a4b8c]"
+                        className="rounded-md border border-[#1a4b8c]/10 bg-white px-2 py-1.5 text-[10px] font-semibold text-[#1a4b8c]"
                       >
                         {medicine.name} · {medicine.dosage} ·{" "}
                         {medicine.frequency} · {medicine.duration}
@@ -1072,7 +1101,7 @@ export const PharmacyWorkspace: React.FC = () => {
                 <button
                   type="button"
                   onClick={addDispenseItem}
-                  className="flex items-center gap-1 rounded-md border border-[#1a4b8c]/15 bg-[#1a4b8c]/5 px-2.5 py-1.5 text-[9px] font-bold uppercase tracking-wide text-[#1a4b8c] transition-colors hover:bg-[#1a4b8c]/10"
+                  className="flex items-center gap-1 rounded-md border border-[#1a4b8c]/15 bg-[#1a4b8c]/5 px-2.5 py-2 text-[9px] font-bold uppercase tracking-wide text-[#1a4b8c] transition-colors hover:bg-[#1a4b8c]/10"
                 >
                   <Plus className="h-3.5 w-3.5" />
                   <span>Add Item</span>
@@ -1095,38 +1124,56 @@ export const PharmacyWorkspace: React.FC = () => {
                       key={`dispense-item-${index}`}
                       className="grid grid-cols-1 gap-2 rounded-lg border border-slate-200 bg-slate-50 p-3 sm:grid-cols-[1fr_110px_36px]"
                     >
-                      <select
-                        required
-                        value={item.medicineId}
-                        onChange={(event) =>
-                          updateDispenseItem(
-                            index,
-                            "medicineId",
-                            event.target.value,
-                          )
-                        }
-                        className="w-full cursor-pointer rounded-md border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 outline-none focus:border-[#029352]"
-                      >
-                        <option value="">SELECT INVENTORY MEDICINE</option>
+                      <div className="relative w-full">
+                        <select
+                          required
+                          value={item.medicineId}
+                          onChange={(event) =>
+                            updateDispenseItem(
+                              index,
+                              "medicineId",
+                              event.target.value,
+                            )
+                          }
+                          className="w-full cursor-pointer rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2.5 text-[11px] font-semibold text-slate-500 outline-none focus:border-[#029352] appearance-none"
+                        >
+                          <option value="">SELECT INVENTORY MEDICINE</option>
 
-                        {inventory.map((medicine: any) => {
-                          const unavailable =
-                            medicine.availableStock <= 0 ||
-                            isExpired(medicine.expiryDate);
+                          {inventory.map((medicine: any) => {
+                            const unavailable =
+                              medicine.availableStock <= 0 ||
+                              isExpired(medicine.expiryDate);
 
-                          return (
-                            <option
-                              key={medicine._id}
-                              value={medicine._id}
-                              disabled={unavailable}
-                            >
-                              {medicine.name} · Stock: {medicine.availableStock}{" "}
-                              · {formatCurrency(medicine.pricePerUnit)}
-                              {unavailable ? " · UNAVAILABLE" : ""}
-                            </option>
-                          );
-                        })}
-                      </select>
+                            return (
+                              <option
+                                key={medicine._id}
+                                value={medicine._id}
+                                disabled={unavailable}
+                              >
+                                {medicine.name} · Stock:{" "}
+                                {medicine.availableStock} ·{" "}
+                                {formatCurrency(medicine.pricePerUnit)}
+                                {unavailable ? " · UNAVAILABLE" : ""}
+                              </option>
+                            );
+                          })}
+                        </select>
+                        <div className="absolute inset-y-0 right-2 flex items-center pointer-events-none text-slate-400">
+                          <svg
+                            className="w-4 h-4"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth="2.5"
+                              d="M19 9l-7 7-7-7"
+                            />
+                          </svg>
+                        </div>
+                      </div>
 
                       <input
                         type="number"
@@ -1142,7 +1189,7 @@ export const PharmacyWorkspace: React.FC = () => {
                           )
                         }
                         placeholder="Qty"
-                        className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-center text-xs font-semibold text-slate-700 outline-none focus:border-[#029352]"
+                        className="w-full rounded-md border border-slate-200 bg-white px-3 py-2.5 text-center text-[11px] font-semibold text-slate-500 outline-none focus:border-[#029352]"
                       />
 
                       <button

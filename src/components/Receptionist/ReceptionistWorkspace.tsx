@@ -295,13 +295,13 @@ export const ReceptionistWorkspace: React.FC = () => {
       </div>
 
       {successMsg && (
-        <div className="mb-4 rounded-lg border border-emerald-100 bg-emerald-50 p-4 text-xs font-bold text-[#029352] shadow-sm">
+        <div className="mb-4 rounded-lg border border-emerald-100 bg-emerald-50 p-4 text-xs text-[#029352] shadow-sm">
           {successMsg}
         </div>
       )}
 
       {errorMsg && (
-        <div className="mb-4 rounded-lg border border-rose-100 bg-rose-50 p-4 text-xs font-bold text-rose-600 shadow-sm">
+        <div className="mb-4 rounded-lg border border-rose-100 bg-rose-50 p-4 text-xs text-rose-600 shadow-sm">
           {errorMsg}
         </div>
       )}

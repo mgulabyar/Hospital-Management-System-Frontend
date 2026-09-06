@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable react-hooks/set-state-in-effect */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -35,7 +36,7 @@ export const LabWorkspace: React.FC = () => {
 
   useEffect(() => {
     syncHospitalLabQueue();
-  }, [syncHospitalLabQueue]);
+  }, []);
 
   const handleFormSubmitResult = async (
     event: React.FormEvent<HTMLFormElement>,
@@ -74,6 +75,40 @@ export const LabWorkspace: React.FC = () => {
 
   return (
     <div className="mx-auto max-w-7xl p-6 font-sans antialiased text-slate-700">
+      {successMsg && (
+        <div className="pointer-events-none fixed inset-x-0 top-20 z-70 flex justify-center px-4 sm:justify-end sm:px-6">
+          <div className="pointer-events-auto flex w-full max-w-md items-start gap-3 rounded-lg border border-emerald-100 bg-emerald-50 p-4 text-xs font-bold text-[#029352] shadow-xl">
+            <CheckCircle className="mt-0.5 h-4 w-4 shrink-0" />
+            <p className="pr-3 leading-relaxed">{successMsg}</p>
+            <button
+              type="button"
+              onClick={() => setSuccessMsg("")}
+              className="ml-auto rounded p-0.5 transition-colors hover:bg-black/5"
+              aria-label="Close notification"
+            >
+              <RefreshCw className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {errorMsg && (
+        <div className="pointer-events-none fixed inset-x-0 top-20 z-70 flex justify-center px-4 sm:justify-end sm:px-6">
+          <div className="pointer-events-auto flex w-full max-w-md items-start gap-3 rounded-lg border border-rose-100 bg-rose-50 p-4 text-xs font-bold text-rose-600 shadow-xl">
+            <Beaker className="mt-0.5 h-4 w-4 shrink-0" />
+            <p className="pr-3 leading-relaxed">{errorMsg}</p>
+            <button
+              type="button"
+              onClick={() => setErrorMsg("")}
+              className="ml-auto rounded p-0.5 transition-colors hover:bg-black/5"
+              aria-label="Close notification"
+            >
+              <RefreshCw className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="mb-6 flex items-center justify-between rounded-lg border border-slate-200/60 bg-slate-50 p-5 shadow-sm">
         <div>
           <h1 className="text-xl font-bold tracking-tight text-[#1a4b8c]">
@@ -90,25 +125,12 @@ export const LabWorkspace: React.FC = () => {
         </div>
       </div>
 
-      {successMsg && (
-        <div className="mb-4 rounded-lg border border-emerald-100 bg-emerald-50 p-4 text-xs font-bold text-[#029352] shadow-sm">
-          {successMsg}
-        </div>
-      )}
-
-      {errorMsg && (
-        <div className="mb-4 rounded-lg border border-rose-100 bg-rose-50 p-4 text-xs font-bold text-rose-600 shadow-sm">
-          {errorMsg}
-        </div>
-      )}
-
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        {/* Queue Panel */}
         <div className="rounded-lg border border-slate-200/80 bg-white p-5 shadow-sm lg:col-span-1">
           <div className="mb-4 flex items-center justify-between border-b border-slate-100 pb-3">
             <div className="flex items-center gap-2">
-              <div className="rounded-lg bg-[#1a4b8c]/10 p-2 text-[#1a4b8c]">
-                <FlaskConical className="h-4 w-4" />
+              <div className="rounded-md bg-[#1a4b8c]/10 p-2 text-[#1a4b8c]">
+                <FlaskConical className="h-5 w-5" />
               </div>
 
               <div>
@@ -160,7 +182,7 @@ export const LabWorkspace: React.FC = () => {
                   }`}
                 >
                   <div className="mb-2 flex items-center justify-between">
-                    <span className="max-w-37.5 truncate text-xs font-bold uppercase tracking-tight text-slate-800">
+                    <span className="max-w-37.5 truncate text-[11px] font-bold uppercase tracking-tight text-slate-800">
                       {report.testName}
                     </span>
 

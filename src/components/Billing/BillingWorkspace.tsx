@@ -405,8 +405,8 @@ export const BillingWorkspace: React.FC = () => {
           <div className="mb-4 flex items-center justify-between border-b border-slate-100 pb-3">
             <div className="flex items-center gap-2 text-[#1a4b8c]">
               <UserSearch className="h-5 w-5 shrink-0" />
-              <h3 className="text-sm font-bold uppercase tracking-wide">
-                Billing Cases
+              <h3 className="text-sm font-bold uppercase text-[#1a4b8c]">
+                Billing <span className="text-[#029352]">Cases</span>
               </h3>
             </div>
 
@@ -424,32 +424,66 @@ export const BillingWorkspace: React.FC = () => {
           </div>
 
           <div className="mb-4 space-y-2.5">
-            <select
-              value={filterStage}
-              onChange={(event) => setFilterStage(event.target.value)}
-              className="w-full cursor-pointer rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-[10px] font-bold uppercase tracking-wide text-slate-600 outline-none focus:border-[#1a4b8c] focus:bg-white focus:ring-2 focus:ring-[#1a4b8c]/10"
-            >
-              <option value="">ALL BILLING STAGES</option>
-              <option value="Ready for Billing">READY FOR BILLING</option>
-              <option value="Invoice Unpaid">INVOICE UNPAID</option>
-              <option value="Partial Payment">PARTIAL PAYMENT</option>
-              <option value="Paid">PAID</option>
-              <option value="Awaiting Consultation">
-                AWAITING CONSULTATION
-              </option>
-              <option value="Cancelled">CANCELLED</option>
-            </select>
+            <div className="relative w-full">
+              <select
+                value={filterStage}
+                onChange={(event) => setFilterStage(event.target.value)}
+                className="w-full cursor-pointer rounded-md border border-slate-200 bg-slate-50 pl-3 pr-10 py-2 text-[10px] font-bold uppercase tracking-wide text-slate-600 outline-none focus:border-[#1a4b8c] focus:bg-white focus:ring-2 focus:ring-[#1a4b8c]/10 appearance-none"
+              >
+                <option value="">ALL BILLING STAGES</option>
+                <option value="Ready for Billing">READY FOR BILLING</option>
+                <option value="Invoice Unpaid">INVOICE UNPAID</option>
+                <option value="Partial Payment">PARTIAL PAYMENT</option>
+                <option value="Paid">PAID</option>
+                <option value="Awaiting Consultation">
+                  AWAITING CONSULTATION
+                </option>
+                <option value="Cancelled">CANCELLED</option>
+              </select>
+              <div className="absolute inset-y-0 right-2 flex items-center pointer-events-none text-slate-400">
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2.5"
+                    d="M19 9l-7 7-7-7"
+                  />
+                </svg>
+              </div>
+            </div>
 
-            <select
-              value={filterPaymentStatus}
-              onChange={(event) => setFilterPaymentStatus(event.target.value)}
-              className="w-full cursor-pointer rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-[10px] font-bold uppercase tracking-wide text-slate-600 outline-none focus:border-[#1a4b8c] focus:bg-white focus:ring-2 focus:ring-[#1a4b8c]/10"
-            >
-              <option value="">ALL PAYMENT STATES</option>
-              <option value="Unpaid">UNPAID</option>
-              <option value="Partial">PARTIAL</option>
-              <option value="Paid">PAID</option>
-            </select>
+            <div className="relative w-full">
+              <select
+                value={filterPaymentStatus}
+                onChange={(event) => setFilterPaymentStatus(event.target.value)}
+                className="w-full cursor-pointer rounded-md border border-slate-200 bg-slate-50 pl-3 pr-10 py-2 text-[10px] font-bold uppercase tracking-wide text-slate-600 outline-none focus:border-[#1a4b8c] focus:bg-white focus:ring-2 focus:ring-[#1a4b8c]/10 appearance-none"
+              >
+                <option value="">ALL PAYMENT STATES</option>
+                <option value="Unpaid">UNPAID</option>
+                <option value="Partial">PARTIAL</option>
+                <option value="Paid">PAID</option>
+              </select>
+              <div className="absolute inset-y-0 right-2 flex items-center pointer-events-none text-slate-400">
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2.5"
+                    d="M19 9l-7 7-7-7"
+                  />
+                </svg>
+              </div>
+            </div>
 
             <input
               type="date"
@@ -465,7 +499,7 @@ export const BillingWorkspace: React.FC = () => {
                 setFilterStage("");
                 setFilterPaymentStatus("");
               }}
-              className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-[9px] font-bold uppercase tracking-wide text-slate-500 transition-colors hover:bg-slate-50"
+              className="w-full rounded-md border border-slate-200 bg-white px-3 py-2.5 text-[9px] font-bold uppercase tracking-wide text-slate-500 transition-colors hover:bg-slate-50"
             >
               Clear Case Filters
             </button>
@@ -476,7 +510,7 @@ export const BillingWorkspace: React.FC = () => {
               value={selectedCase?.tokenId || ""}
               onChange={handlePatientSelectionChange}
               disabled={loadingQueue || loading}
-              className="w-full cursor-pointer appearance-none rounded-md border border-slate-200 bg-slate-50 py-2.5 pl-3 pr-10 text-xs font-bold uppercase tracking-wide text-slate-700 outline-none transition-all duration-200 focus:border-[#1a4b8c] focus:bg-white focus:ring-2 focus:ring-[#1a4b8c]/10 disabled:cursor-not-allowed disabled:opacity-60"
+              className="w-full cursor-pointer appearance-none rounded-md border border-slate-200 bg-slate-50 py-2.5 pl-3 pr-10 text-[11px] uppercase tracking-wide text-slate-500 outline-none transition-all duration-200 focus:border-[#1a4b8c] focus:bg-white focus:ring-2 focus:ring-[#1a4b8c]/10 disabled:cursor-not-allowed disabled:opacity-60"
             >
               <option value="">CHOOSE PATIENT CASE</option>
 
@@ -597,16 +631,16 @@ export const BillingWorkspace: React.FC = () => {
           )}
         </div>
 
-        <div className="rounded-lg border border-slate-200/80 bg-white p-5 shadow-sm">
+        <div className="rounded-lg border font-sans border-slate-200/80 bg-white p-5 shadow-sm">
           {activeInvoice && selectedCase ? (
             <form
               onSubmit={handleLedgerSettlePaymentForm}
               className="space-y-5"
             >
-              <div className="rounded-xl border border-slate-200/60 bg-slate-50 p-5 shadow-inner">
+              <div className="rounded-xl font-sans border border-slate-200/60 bg-slate-50 p-5 shadow-inner">
                 <div className="mb-4 flex flex-col gap-3 border-b border-slate-200/60 pb-3 sm:flex-row sm:items-center sm:justify-between">
                   <div>
-                    <span className="block text-[10px] font-black uppercase tracking-wider text-[#1a4b8c]">
+                    <span className="block text-[10px] font-bold font-sans uppercase tracking-wide text-[#1a4b8c]">
                       Central Hospital Invoice
                     </span>
 

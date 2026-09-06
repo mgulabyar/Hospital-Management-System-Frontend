@@ -63,7 +63,7 @@ export const DoctorWorkspace: React.FC = () => {
     useState<boolean>(false);
 
   const [selectedQueueStatus, setSelectedQueueStatus] =
-    useState<string>("Pending");
+    useState<string>("Active");
   const [queueDate, setQueueDate] = useState<string>(getTodayDate());
 
   const [successMsg, setSuccessMsg] = useState<string>("");
@@ -112,57 +112,47 @@ export const DoctorWorkspace: React.FC = () => {
     return () => window.clearTimeout(timeoutId);
   }, [successMsg, errorMsg]);
 
-  const fetchActiveDoctorQueueList = useCallback(async () => {
-    setLoading(true);
 
-    try {
-      const statusQuery =
-        selectedQueueStatus === "Active"
-          ? "Pending,In-Consultation"
-          : selectedQueueStatus === "Pending"
-            ? "Pending"
-            : selectedQueueStatus === "In-Consultation"
-              ? "In-Consultation"
-              : selectedQueueStatus === "Completed"
-                ? "Completed"
-                : "Cancelled";
+const fetchActiveDoctorQueueList = useCallback(async () => {
+  setLoading(true);
 
-      const response = await hmsDoctorServices.getDoctorQueue(
-        statusQuery,
-        undefined,
-        undefined,
-        queueDate || undefined,
-      );
+  try {
+    const statusQuery =
+      selectedQueueStatus === "Active"
+        ? "Pending,In-Consultation"
+        : selectedQueueStatus === "Pending"
+          ? "Pending"
+          : selectedQueueStatus === "In-Consultation"
+            ? "In-Consultation"
+            : selectedQueueStatus === "Completed"
+              ? "Completed"
+              : "Cancelled";
 
-      if (response.success) {
-        const nextQueue = response.data || [];
-        setQueue(nextQueue);
+    const response = await hmsDoctorServices.getDoctorQueue(
+      statusQuery,
+      undefined,
+      undefined,
+      queueDate || undefined,
+    );
 
-        if (activeEncounter) {
-          const refreshedActiveEncounter = nextQueue.find(
-            (token: any) => token._id === activeEncounter._id,
-          );
-
-          if (refreshedActiveEncounter) {
-            setActiveEncounter(refreshedActiveEncounter);
-          } else {
-            setActiveEncounter(null);
-          }
-        }
-      } else {
-        setQueue([]);
-      }
-    } catch (err: any) {
+    if (response.success) {
+      const nextQueue = response.data || [];
+      setQueue(nextQueue);
+    } else {
       setQueue([]);
-      showToast(
-        err?.response?.data?.message ||
-          "Failed to synchronize clinical queue parameters.",
-        "error",
-      );
-    } finally {
-      setLoading(false);
     }
-  }, [activeEncounter, queueDate, selectedQueueStatus, showToast]);
+  } catch (err: any) {
+    setQueue([]);
+    showToast(
+      err?.response?.data?.message ||
+        "Failed to synchronize clinical queue parameters.",
+      "error",
+    );
+  } finally {
+    setLoading(false);
+  }
+}, [queueDate, selectedQueueStatus, showToast]);
+
   useEffect(() => {
     fetchActiveDoctorQueueList();
   }, [fetchActiveDoctorQueueList]);
@@ -377,7 +367,7 @@ export const DoctorWorkspace: React.FC = () => {
       {(successMsg || errorMsg) && (
         <div className="fixed right-6 top-20 z-70 w-[calc(100%-3rem)] max-w-md">
           <div
-            className={`flex items-start gap-3 rounded-lg border p-4 text-xs font-bold shadow-xl ${
+            className={`flex items-start gap-3 rounded-md border p-4 text-xs shadow-xl ${
               successMsg
                 ? "border-emerald-100 bg-emerald-50 text-[#029352]"
                 : "border-rose-100 bg-rose-50 text-rose-600"
@@ -614,12 +604,10 @@ export const DoctorWorkspace: React.FC = () => {
                     <span>History</span>
                   </button>
 
-                  <div className="rounded-md bg-[#1a4b8c]/10 px-3 py-1.5 text-center">
-                    <p className="text-[9px] font-bold uppercase tracking-wide text-[#1a4b8c]">
-                      Visit Token
-                    </p>
+                  <div className="rounded-md bg-[#1a4b8c]/6 px-3 py-2 text-center">
+        
 
-                    <p className="text-sm font-black text-[#1a4b8c]">
+                    <p className="text-xs font-semibold text-[#1a4b8c]">
                       {activeEncounter.displayToken ||
                         `#${activeEncounter.tokenNumber}`}
                     </p>
