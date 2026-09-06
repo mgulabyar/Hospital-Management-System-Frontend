@@ -38,7 +38,24 @@ export const hmsDoctorServices = {
     const searchParams = new URLSearchParams();
 
     if (statusQuery) {
-      searchParams.set("status", statusQuery);
+      // Map appointment status to token status
+      const mappedStatus = statusQuery
+        .split(",")
+        .map((status) => {
+          if (status === "Checked-In") {
+            return "Pending";
+          }
+          if (status === "Completed") {
+            return "Completed";
+          }
+          if (status === "Cancelled") {
+            return "Cancelled";
+          }
+          return status;
+        })
+        .join(",");
+
+      searchParams.set("status", mappedStatus);
     }
 
     if (doctorId) {

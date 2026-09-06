@@ -63,7 +63,7 @@ export const DoctorWorkspace: React.FC = () => {
     useState<boolean>(false);
 
   const [selectedQueueStatus, setSelectedQueueStatus] =
-    useState<string>("Active");
+    useState<string>("Pending");
   const [queueDate, setQueueDate] = useState<string>(getTodayDate());
 
   const [successMsg, setSuccessMsg] = useState<string>("");
@@ -119,7 +119,13 @@ export const DoctorWorkspace: React.FC = () => {
       const statusQuery =
         selectedQueueStatus === "Active"
           ? "Pending,In-Consultation"
-          : selectedQueueStatus;
+          : selectedQueueStatus === "Pending"
+            ? "Pending"
+            : selectedQueueStatus === "In-Consultation"
+              ? "In-Consultation"
+              : selectedQueueStatus === "Completed"
+                ? "Completed"
+                : "Cancelled";
 
       const response = await hmsDoctorServices.getDoctorQueue(
         statusQuery,
@@ -157,7 +163,6 @@ export const DoctorWorkspace: React.FC = () => {
       setLoading(false);
     }
   }, [activeEncounter, queueDate, selectedQueueStatus, showToast]);
-
   useEffect(() => {
     fetchActiveDoctorQueueList();
   }, [fetchActiveDoctorQueueList]);
@@ -303,17 +308,15 @@ export const DoctorWorkspace: React.FC = () => {
     setSubmittingEncounter(true);
 
     try {
-      const response = await hmsDoctorServices.submitMedicalRecordPrescription(
-        {
-          token: activeEncounter._id,
-          patient: activeEncounter.patient?._id,
-          chiefComplaints: chiefComplaints.trim(),
-          diagnosis: diagnosis.trim(),
-          medicines: medicinesList,
-          advisedLabTests: advisedLabs,
-          notes: notes.trim(),
-        },
-      );
+      const response = await hmsDoctorServices.submitMedicalRecordPrescription({
+        token: activeEncounter._id,
+        patient: activeEncounter.patient?._id,
+        chiefComplaints: chiefComplaints.trim(),
+        diagnosis: diagnosis.trim(),
+        medicines: medicinesList,
+        advisedLabTests: advisedLabs,
+        notes: notes.trim(),
+      });
 
       if (response.success) {
         showToast(
@@ -425,8 +428,8 @@ export const DoctorWorkspace: React.FC = () => {
         <div className="rounded-lg border border-slate-200/80 bg-white p-5 shadow-sm lg:col-span-1">
           <div className="mb-4 flex items-center justify-between border-b border-slate-100 pb-3">
             <div className="flex items-center gap-2">
-              <div className="rounded-lg bg-[#1a4b8c]/10 p-2 text-[#1a4b8c]">
-                <Activity className="h-4 w-4" />
+              <div className="rounded-md bg-[#1a4b8c]/10 p-2 text-[#1a4b8c]">
+                <Activity className="h-5 w-5" />
               </div>
 
               <div>
@@ -434,8 +437,8 @@ export const DoctorWorkspace: React.FC = () => {
                   Patient <span className="text-[#029352]">Visits</span>
                 </h3>
 
-                <p className="mt-0.5 text-[10px] font-medium text-slate-400">
-                  Your live OPD and checked-in appointment queue.
+                <p className="mt-0.5 text-[10px] flex-nowrap font-medium text-slate-400">
+                  Your live checked-in appointment queue.
                 </p>
               </div>
             </div>
@@ -448,23 +451,40 @@ export const DoctorWorkspace: React.FC = () => {
               title="Refresh Queue"
             >
               <RefreshCw
-                className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`}
+                className={`h-4 w-4 ${loading ? "animate-spin" : ""}`}
               />
             </button>
           </div>
 
           <div className="mb-4 grid grid-cols-2 gap-2">
-            <select
-              value={selectedQueueStatus}
-              onChange={(event) => setSelectedQueueStatus(event.target.value)}
-              className="cursor-pointer rounded-md border border-slate-200 bg-slate-50 px-2.5 py-2 text-[10px] font-bold uppercase tracking-wide text-slate-600 outline-none transition-all focus:border-[#029352] focus:bg-white focus:ring-2 focus:ring-[#029352]/10"
-            >
-              <option value="Active">ACTIVE VISITS</option>
-              <option value="Pending">PENDING</option>
-              <option value="In-Consultation">IN CONSULTATION</option>
-              <option value="Completed">COMPLETED</option>
-              <option value="Cancelled">CANCELLED</option>
-            </select>
+            <div className="relative w-full">
+              <select
+                value={selectedQueueStatus}
+                onChange={(event) => setSelectedQueueStatus(event.target.value)}
+                className="w-full cursor-pointer rounded-md border border-slate-200 bg-slate-50 pl-3 pr-10 py-2 text-[10px] font-bold uppercase tracking-wide text-slate-600 outline-none transition-all focus:border-[#029352] focus:bg-white focus:ring-2 focus:ring-[#029352]/10 appearance-none"
+              >
+                <option value="Active">ACTIVE VISITS</option>
+                <option value="Pending">PENDING</option>
+                <option value="In-Consultation">IN CONSULTATION</option>
+                <option value="Completed">COMPLETED</option>
+                <option value="Cancelled">CANCELLED</option>
+              </select>
+              <div className="absolute inset-y-0 right-2 flex items-center pointer-events-none text-slate-400">
+                <svg
+                  className="w-3.5 h-3.5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2.5"
+                    d="M19 9l-7 7-7-7"
+                  />
+                </svg>
+              </div>
+            </div>
 
             <input
               type="date"
@@ -712,9 +732,7 @@ export const DoctorWorkspace: React.FC = () => {
                         <input
                           type="text"
                           value={medDosage}
-                          onChange={(event) =>
-                            setMedDosage(event.target.value)
-                          }
+                          onChange={(event) => setMedDosage(event.target.value)}
                           placeholder="500mg / 1 tab"
                           className="w-full rounded-md border border-slate-200 bg-white px-2.5 py-2 text-xs font-semibold text-slate-700 outline-none transition-all placeholder:text-slate-300 focus:border-[#029352]"
                         />
@@ -780,16 +798,12 @@ export const DoctorWorkspace: React.FC = () => {
                               <tr key={`${med.name}-${index}`}>
                                 <td className="px-3 py-2.5">{med.name}</td>
                                 <td className="px-3 py-2.5">{med.dosage}</td>
-                                <td className="px-3 py-2.5">
-                                  {med.frequency}
-                                </td>
+                                <td className="px-3 py-2.5">{med.frequency}</td>
                                 <td className="px-3 py-2.5">{med.duration}</td>
                                 <td className="px-3 py-2.5 text-center">
                                   <button
                                     type="button"
-                                    onClick={() =>
-                                      removeMedicineRowItem(index)
-                                    }
+                                    onClick={() => removeMedicineRowItem(index)}
                                     className="rounded-md p-1 text-rose-500 transition-colors hover:bg-rose-50"
                                     aria-label="Remove medicine"
                                   >
@@ -928,8 +942,8 @@ export const DoctorWorkspace: React.FC = () => {
 
               <p className="mt-1.5 max-w-sm text-xs font-medium leading-relaxed text-slate-500">
                 Select a pending patient visit from the queue, start the
-                consultation, then document diagnosis, prescription, lab
-                advice, and clinical guidance.
+                consultation, then document diagnosis, prescription, lab advice,
+                and clinical guidance.
               </p>
             </div>
           )}

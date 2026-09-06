@@ -924,7 +924,7 @@ export const AppointmentWorkspace: React.FC = () => {
 
         {!loading && appointments.length > 0 && (
           <div className="overflow-x-auto rounded-lg border border-slate-200/60">
-            <table className="w-full min-w-262.5 border-collapse text-left">
+            <table className="w-full min-w-252 border-collapse text-left">
               <thead>
                 <tr className="border-b border-slate-200/60 bg-slate-50 text-[10px] font-bold uppercase tracking-wider text-slate-400">
                   <th className="px-4 py-3">Appointment</th>
