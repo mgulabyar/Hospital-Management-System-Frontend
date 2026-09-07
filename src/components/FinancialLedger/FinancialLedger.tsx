@@ -8,6 +8,7 @@ import {
   CircleDollarSign,
   CreditCard,
   Layers,
+  ReceiptText,
   RefreshCw,
   Search,
   Wallet,
@@ -64,7 +65,10 @@ export const FinancialLedger: React.FC = () => {
           startDate: startDate || undefined,
           endDate: endDate || undefined,
         }),
-        hmsBillingServices.getDashboardAnalytics(),
+        hmsBillingServices.getDashboardAnalytics().catch(() => ({
+          success: false,
+          data: null,
+        })),
       ]);
 
       if (invoiceResponse.success) {
@@ -124,12 +128,10 @@ export const FinancialLedger: React.FC = () => {
             type="button"
             onClick={fetchLedgerData}
             disabled={loading}
-            className="rounded-lg border border-slate-200 bg-white p-2 text-slate-400 transition-colors hover:bg-[#1a4b8c]/5 hover:text-[#1a4b8c] disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded-lg border border-slate-200 bg-white p-2.5 text-slate-400 transition-colors hover:bg-[#1a4b8c]/5 hover:text-[#1a4b8c] disabled:cursor-not-allowed disabled:opacity-50"
             title="Refresh Financial Ledger"
           >
-            <RefreshCw
-              className={`h-4 w-4 ${loading ? "animate-spin" : ""}`}
-            />
+            <RefreshCw className={`h-5 w-5 ${loading ? "animate-spin" : ""}`} />
           </button>
 
           <div className="shrink-0 rounded-lg border border-emerald-100 bg-[#029352]/10 p-2.5 text-[#029352]">
@@ -147,7 +149,7 @@ export const FinancialLedger: React.FC = () => {
             <Wallet className="h-4 w-4 text-[#029352]" />
           </div>
 
-          <p className="mt-2 text-xl font-black text-[#029352]">
+          <p className="mt-2 text-md font-bold text-[#029352]">
             {formatCurrency(analytics?.netFinancialRevenueCollected)}
           </p>
 
@@ -164,7 +166,7 @@ export const FinancialLedger: React.FC = () => {
             <CircleDollarSign className="h-4 w-4 text-amber-600" />
           </div>
 
-          <p className="mt-2 text-xl font-black text-amber-700">
+          <p className="mt-2 text-md font-bold text-amber-700">
             {formatCurrency(analytics?.outstandingBalance)}
           </p>
 
@@ -181,7 +183,7 @@ export const FinancialLedger: React.FC = () => {
             <CreditCard className="h-4 w-4 text-[#1a4b8c]" />
           </div>
 
-          <p className="mt-2 text-xl font-black text-[#1a4b8c]">
+          <p className="mt-2 text-md font-bold text-[#1a4b8c]">
             {formatCurrency(analytics?.pharmacySalesTotal)}
           </p>
 
@@ -198,7 +200,7 @@ export const FinancialLedger: React.FC = () => {
             <Banknote className="h-4 w-4 text-[#029352]" />
           </div>
 
-          <p className="mt-2 text-xl font-black text-slate-700">
+          <p className="mt-2 text-md font-bold text-slate-700">
             {analytics?.completedConsultationsCount || 0}
           </p>
 
@@ -210,27 +212,41 @@ export const FinancialLedger: React.FC = () => {
 
       <div className="rounded-lg border border-slate-200/80 bg-white p-5 shadow-sm">
         <div className="mb-5 flex flex-col gap-4 border-b border-slate-100 pb-4">
-          <div>
-            <h2 className="text-lg font-bold tracking-tight text-[#1a4b8c]">
+          <div className="flex items-center gap-2 text-[#1a4b8c]">
+            <ReceiptText className="h-5 w-5 shrink-0" />
+            <h3 className="text-sm font-bold uppercase text-[#1a4b8c]">
               Invoice <span className="text-[#029352]">Ledger</span>
-            </h2>
-
-            <p className="mt-0.5 text-xs font-medium text-slate-400">
-              Centralized invoice and payment history.
-            </p>
+            </h3>
           </div>
 
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-4">
-            <select
-              value={paymentStatus}
-              onChange={(event) => setPaymentStatus(event.target.value)}
-              className="w-full cursor-pointer rounded-md border border-slate-200 bg-slate-50 px-3 py-2.5 text-xs font-bold uppercase text-slate-600 outline-none transition-all focus:border-[#029352] focus:bg-white focus:ring-2 focus:ring-[#029352]/10"
-            >
-              <option value="">ALL PAYMENT STATUS</option>
-              <option value="Paid">PAID</option>
-              <option value="Partial">PARTIAL</option>
-              <option value="Unpaid">UNPAID</option>
-            </select>
+            <div className="relative w-full">
+              <select
+                value={paymentStatus}
+                onChange={(event) => setPaymentStatus(event.target.value)}
+                className="w-full cursor-pointer rounded-md border border-slate-200 bg-slate-50 pl-3 pr-10 py-2.5 text-[11px] font-bold uppercase text-slate-500 outline-none transition-all focus:border-[#029352] focus:bg-white focus:ring-2 focus:ring-[#029352]/10 appearance-none"
+              >
+                <option value="">ALL PAYMENT STATUS</option>
+                <option value="Paid">PAID</option>
+                <option value="Partial">PARTIAL</option>
+                <option value="Unpaid">UNPAID</option>
+              </select>
+              <div className="absolute inset-y-0 right-2 flex items-center pointer-events-none text-slate-400">
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2.5"
+                    d="M19 9l-7 7-7-7"
+                  />
+                </svg>
+              </div>
+            </div>
 
             <div className="relative">
               <CalendarDays className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />

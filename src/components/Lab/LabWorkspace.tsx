@@ -212,11 +212,9 @@ export const LabWorkspace: React.FC = () => {
           )}
         </div>
 
-        {/* Result Form Panel */}
         <div className="rounded-lg border border-slate-200/80 bg-white p-5 shadow-sm lg:col-span-2">
           {selectedReport ? (
             <form onSubmit={handleFormSubmitResult} className="space-y-5">
-              {/* Header Info */}
               <div className="rounded-xl border border-slate-200/60 bg-slate-50 p-4">
                 <span className="block text-[10px] font-bold uppercase tracking-wide text-[#1a4b8c]">
                   Pathology Laboratory Specimen Info

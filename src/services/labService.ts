@@ -9,7 +9,6 @@ const apiClient = axios.create({
   },
 });
 
-// Auto Interceptor validation tracking for active authorization sessions token keys
 apiClient.interceptors.request.use(
   (config) => {
     const savedSession = localStorage.getItem("hms_user_session");
@@ -27,16 +26,18 @@ apiClient.interceptors.request.use(
 );
 
 export const hmsLabServices = {
-  // Fetch pending or completed hospital pathology lists from LabReport collection
   getLabReportsQueue: async (statusQuery?: string) => {
-    const url = statusQuery ? `/lab/reports?status=${statusQuery}` : '/lab/reports';
+    const url = statusQuery
+      ? `/lab/reports?status=${statusQuery}`
+      : "/lab/reports";
     const response = await apiClient.get(url);
     return response.data;
   },
 
-  // Post dynamic chemical diagnostic results and change individual status to 'Completed'
   submitAnalyticalLabResult: async (id: string, testResultValues: string) => {
-    const response = await apiClient.put(`/lab/report/${id}`, { testResultValues });
+    const response = await apiClient.put(`/lab/report/${id}`, {
+      testResultValues,
+    });
     return response.data;
-  }
+  },
 };

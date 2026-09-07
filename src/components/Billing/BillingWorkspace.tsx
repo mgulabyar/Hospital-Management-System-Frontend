@@ -428,7 +428,7 @@ export const BillingWorkspace: React.FC = () => {
               <select
                 value={filterStage}
                 onChange={(event) => setFilterStage(event.target.value)}
-                className="w-full cursor-pointer rounded-md border border-slate-200 bg-slate-50 pl-3 pr-10 py-2 text-[10px] font-bold uppercase tracking-wide text-slate-600 outline-none focus:border-[#1a4b8c] focus:bg-white focus:ring-2 focus:ring-[#1a4b8c]/10 appearance-none"
+                className="w-full cursor-pointer rounded-md border border-slate-200 bg-slate-50 pl-3 pr-10 py-2.5 text-[10px] font-bold uppercase tracking-wide text-slate-500 outline-none focus:border-[#1a4b8c] focus:bg-white focus:ring-2 focus:ring-[#1a4b8c]/10 appearance-none"
               >
                 <option value="">ALL BILLING STAGES</option>
                 <option value="Ready for Billing">READY FOR BILLING</option>
@@ -461,7 +461,7 @@ export const BillingWorkspace: React.FC = () => {
               <select
                 value={filterPaymentStatus}
                 onChange={(event) => setFilterPaymentStatus(event.target.value)}
-                className="w-full cursor-pointer rounded-md border border-slate-200 bg-slate-50 pl-3 pr-10 py-2 text-[10px] font-bold uppercase tracking-wide text-slate-600 outline-none focus:border-[#1a4b8c] focus:bg-white focus:ring-2 focus:ring-[#1a4b8c]/10 appearance-none"
+                className="w-full cursor-pointer rounded-md border border-slate-200 bg-slate-50 pl-3 pr-10 py-2.5 text-[10px] font-bold uppercase tracking-wide text-slate-500 outline-none focus:border-[#1a4b8c] focus:bg-white focus:ring-2 focus:ring-[#1a4b8c]/10 appearance-none"
               >
                 <option value="">ALL PAYMENT STATES</option>
                 <option value="Unpaid">UNPAID</option>
@@ -489,7 +489,7 @@ export const BillingWorkspace: React.FC = () => {
               type="date"
               value={filterDate}
               onChange={(event) => setFilterDate(event.target.value)}
-              className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-[10px] font-semibold text-slate-600 outline-none focus:border-[#1a4b8c] focus:bg-white focus:ring-2 focus:ring-[#1a4b8c]/10"
+              className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2.5 text-[10px] font-semibold text-slate-500 outline-none focus:border-[#1a4b8c] focus:bg-white focus:ring-2 focus:ring-[#1a4b8c]/10"
             />
 
             <button
@@ -499,7 +499,7 @@ export const BillingWorkspace: React.FC = () => {
                 setFilterStage("");
                 setFilterPaymentStatus("");
               }}
-              className="w-full rounded-md border border-slate-200 bg-white px-3 py-2.5 text-[9px] font-bold uppercase tracking-wide text-slate-500 transition-colors hover:bg-slate-50"
+              className="w-full rounded-md border border-slate-200 bg-white px-3 py-2.5 text-[10px] font-bold uppercase tracking-wide text-slate-500 transition-colors hover:bg-slate-50"
             >
               Clear Case Filters
             </button>
@@ -510,7 +510,7 @@ export const BillingWorkspace: React.FC = () => {
               value={selectedCase?.tokenId || ""}
               onChange={handlePatientSelectionChange}
               disabled={loadingQueue || loading}
-              className="w-full cursor-pointer appearance-none rounded-md border border-slate-200 bg-slate-50 py-2.5 pl-3 pr-10 text-[11px] uppercase tracking-wide text-slate-500 outline-none transition-all duration-200 focus:border-[#1a4b8c] focus:bg-white focus:ring-2 focus:ring-[#1a4b8c]/10 disabled:cursor-not-allowed disabled:opacity-60"
+              className="w-full cursor-pointer font-bold appearance-none rounded-md border border-slate-200 bg-slate-50 py-2.5 pl-3 pr-10 text-[10px] uppercase tracking-wide text-slate-500 outline-none transition-all duration-200 focus:border-[#1a4b8c] focus:bg-white focus:ring-2 focus:ring-[#1a4b8c]/10 disabled:cursor-not-allowed disabled:opacity-60"
             >
               <option value="">CHOOSE PATIENT CASE</option>
 

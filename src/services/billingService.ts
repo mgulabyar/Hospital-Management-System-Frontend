@@ -82,7 +82,10 @@ export const hmsBillingServices = {
       paymentReference?: string;
     },
   ) => {
-    const response = await apiClient.put(`/billing/settle/${invoiceId}`, payload);
+    const response = await apiClient.put(
+      `/billing/settle/${invoiceId}`,
+      payload,
+    );
     return response.data;
   },
 

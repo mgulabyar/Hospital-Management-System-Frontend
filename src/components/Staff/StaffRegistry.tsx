@@ -11,6 +11,7 @@ import {
   Users,
   ShieldCheck,
   Building2,
+  UserCheck,
 } from "lucide-react";
 import { hmsServices } from "../../services/apiService";
 import { AddStaffModal } from "./AddStaffModal";
@@ -111,7 +112,7 @@ export const StaffRegistry: React.FC = () => {
       <div className="mx-auto max-w-7xl p-6 font-sans antialiased">
         <div className="mb-6 flex items-center justify-between rounded-lg border border-slate-200/60 bg-slate-50 p-5 shadow-sm">
           <div>
-            <h1 className="text-xl font-bold uppercase tracking-tight text-[#1a4b8c]">
+            <h1 className="text-xl font-bold tracking-tight text-[#1a4b8c]">
               Staff Registry <span className="text-[#029352]">Center</span>
             </h1>
 
@@ -128,14 +129,21 @@ export const StaffRegistry: React.FC = () => {
 
         <div className="rounded-lg border border-slate-200/80 bg-white p-5 shadow-sm">
           <div className="mb-5 flex flex-col gap-3 border-b border-slate-100 pb-4 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <h2 className="text-lg font-bold tracking-tight text-[#1a4b8c]">
-                Hospital Staff <span className="text-[#029352]">Accounts</span>
-              </h2>
+            <div className="flex items-center gap-2">
+              <div className="rounded-md bg-[#029352]/10 p-2 text-[#029352] shrink-0">
+                <UserCheck className="h-5 w-5" />
+              </div>
 
-              <p className="mt-0.5 text-xs font-medium text-slate-400">
-                Central database registry for hospital team members.
-              </p>
+              <div>
+                <h3 className="text-sm font-bold uppercase text-[#1a4b8c]">
+                  Hospital Staff{" "}
+                  <span className="text-[#029352]">Accounts</span>
+                </h3>
+
+                <p className="mt-0.5 text-xs font-medium text-slate-400">
+                  Central database registry for hospital team members.
+                </p>
+              </div>
             </div>
 
             <div className="flex shrink-0 items-center gap-3">

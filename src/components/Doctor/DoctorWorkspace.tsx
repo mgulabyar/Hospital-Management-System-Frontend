@@ -112,46 +112,45 @@ export const DoctorWorkspace: React.FC = () => {
     return () => window.clearTimeout(timeoutId);
   }, [successMsg, errorMsg]);
 
+  const fetchActiveDoctorQueueList = useCallback(async () => {
+    setLoading(true);
 
-const fetchActiveDoctorQueueList = useCallback(async () => {
-  setLoading(true);
+    try {
+      const statusQuery =
+        selectedQueueStatus === "Active"
+          ? "Pending,In-Consultation"
+          : selectedQueueStatus === "Pending"
+            ? "Pending"
+            : selectedQueueStatus === "In-Consultation"
+              ? "In-Consultation"
+              : selectedQueueStatus === "Completed"
+                ? "Completed"
+                : "Cancelled";
 
-  try {
-    const statusQuery =
-      selectedQueueStatus === "Active"
-        ? "Pending,In-Consultation"
-        : selectedQueueStatus === "Pending"
-          ? "Pending"
-          : selectedQueueStatus === "In-Consultation"
-            ? "In-Consultation"
-            : selectedQueueStatus === "Completed"
-              ? "Completed"
-              : "Cancelled";
+      const response = await hmsDoctorServices.getDoctorQueue(
+        statusQuery,
+        undefined,
+        undefined,
+        queueDate || undefined,
+      );
 
-    const response = await hmsDoctorServices.getDoctorQueue(
-      statusQuery,
-      undefined,
-      undefined,
-      queueDate || undefined,
-    );
-
-    if (response.success) {
-      const nextQueue = response.data || [];
-      setQueue(nextQueue);
-    } else {
+      if (response.success) {
+        const nextQueue = response.data || [];
+        setQueue(nextQueue);
+      } else {
+        setQueue([]);
+      }
+    } catch (err: any) {
       setQueue([]);
+      showToast(
+        err?.response?.data?.message ||
+          "Failed to synchronize clinical queue parameters.",
+        "error",
+      );
+    } finally {
+      setLoading(false);
     }
-  } catch (err: any) {
-    setQueue([]);
-    showToast(
-      err?.response?.data?.message ||
-        "Failed to synchronize clinical queue parameters.",
-      "error",
-    );
-  } finally {
-    setLoading(false);
-  }
-}, [queueDate, selectedQueueStatus, showToast]);
+  }, [queueDate, selectedQueueStatus, showToast]);
 
   useEffect(() => {
     fetchActiveDoctorQueueList();
@@ -441,7 +440,7 @@ const fetchActiveDoctorQueueList = useCallback(async () => {
               title="Refresh Queue"
             >
               <RefreshCw
-                className={`h-4 w-4 ${loading ? "animate-spin" : ""}`}
+                className={`h-5 w-5 ${loading ? "animate-spin" : ""}`}
               />
             </button>
           </div>
@@ -451,7 +450,7 @@ const fetchActiveDoctorQueueList = useCallback(async () => {
               <select
                 value={selectedQueueStatus}
                 onChange={(event) => setSelectedQueueStatus(event.target.value)}
-                className="w-full cursor-pointer rounded-md border border-slate-200 bg-slate-50 pl-3 pr-10 py-2 text-[10px] font-bold uppercase tracking-wide text-slate-600 outline-none transition-all focus:border-[#029352] focus:bg-white focus:ring-2 focus:ring-[#029352]/10 appearance-none"
+                className="w-full cursor-pointer rounded-md border border-slate-200 bg-slate-50 pl-3 pr-10 py-2.5 text-[10px] font-bold uppercase tracking-wide text-slate-500 outline-none transition-all focus:border-[#029352] focus:bg-white focus:ring-2 focus:ring-[#029352]/10 appearance-none"
               >
                 <option value="Active">ACTIVE VISITS</option>
                 <option value="Pending">PENDING</option>
@@ -480,7 +479,7 @@ const fetchActiveDoctorQueueList = useCallback(async () => {
               type="date"
               value={queueDate}
               onChange={(event) => setQueueDate(event.target.value)}
-              className="rounded-md border border-slate-200 bg-slate-50 px-2 py-2 text-[10px] font-semibold text-slate-600 outline-none transition-all focus:border-[#029352] focus:bg-white focus:ring-2 focus:ring-[#029352]/10"
+              className="rounded-md border border-slate-200 bg-slate-50 px-2 py-2.5 text-[10px] font-semibold text-slate-600 outline-none transition-all focus:border-[#029352] focus:bg-white focus:ring-2 focus:ring-[#029352]/10"
             />
           </div>
 
@@ -605,8 +604,6 @@ const fetchActiveDoctorQueueList = useCallback(async () => {
                   </button>
 
                   <div className="rounded-md bg-[#1a4b8c]/6 px-3 py-2 text-center">
-        
-
                     <p className="text-xs font-semibold text-[#1a4b8c]">
                       {activeEncounter.displayToken ||
                         `#${activeEncounter.tokenNumber}`}

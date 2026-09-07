@@ -439,7 +439,7 @@ export const IPDWorkspace: React.FC = () => {
             type="button"
             onClick={fetchIPDData}
             disabled={loading}
-            className="rounded-md border border-slate-200 bg-white p-2 text-slate-400 transition-colors hover:bg-[#1a4b8c]/5 hover:text-[#1a4b8c] disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded-md border border-slate-200 bg-white p-2.5 text-slate-400 transition-colors hover:bg-[#1a4b8c]/5 hover:text-[#1a4b8c] disabled:cursor-not-allowed disabled:opacity-50"
             title="Refresh IPD Data"
           >
             <RefreshCw className={`h-5 w-5 ${loading ? "animate-spin" : ""}`} />
@@ -449,7 +449,7 @@ export const IPDWorkspace: React.FC = () => {
             <button
               type="button"
               onClick={() => setShowWardModal(true)}
-              className="flex items-center gap-2 rounded-md bg-[#1a4b8c] px-4 py-2.5 text-[10px] font-bold uppercase tracking-wider text-white shadow-sm transition-colors hover:bg-[#143b6e]"
+              className="flex items-center gap-2 rounded-md bg-[#1a4b8c] px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-white shadow-sm transition-colors hover:bg-[#143b6e]"
             >
               <Plus className="h-3.5 w-3.5" />
               <span>Add Ward</span>
@@ -471,7 +471,7 @@ export const IPDWorkspace: React.FC = () => {
             <Building2 className="h-4 w-4 text-[#1a4b8c]" />
           </div>
 
-          <p className="mt-2 text-2xl font-bold text-[#1a4b8c]">
+          <p className="mt-2 text-md font-bold text-[#1a4b8c]">
             {dashboard?.totalWards || 0}
           </p>
         </div>
@@ -484,7 +484,7 @@ export const IPDWorkspace: React.FC = () => {
             <BedDouble className="h-4 w-4 text-slate-500" />
           </div>
 
-          <p className="mt-2 text-2xl font-bold text-slate-700">
+          <p className="mt-2 text-md font-bold text-slate-700">
             {dashboard?.totalBeds || 0}
           </p>
         </div>
@@ -497,7 +497,7 @@ export const IPDWorkspace: React.FC = () => {
             <CheckCircle2 className="h-4 w-4 text-[#029352]" />
           </div>
 
-          <p className="mt-2 text-2xl font-bold text-[#029352]">
+          <p className="mt-2 text-md font-bold text-[#029352]">
             {dashboard?.availableBeds || 0}
           </p>
         </div>
@@ -510,7 +510,7 @@ export const IPDWorkspace: React.FC = () => {
             <UsersRound className="h-4 w-4 text-rose-600" />
           </div>
 
-          <p className="mt-2 text-2xl font-bold text-rose-700">
+          <p className="mt-2 text-md font-bold text-rose-700">
             {dashboard?.occupiedBeds || 0}
           </p>
         </div>
@@ -523,7 +523,7 @@ export const IPDWorkspace: React.FC = () => {
             <Hospital className="h-4 w-4 text-amber-700" />
           </div>
 
-          <p className="mt-2 text-2xl font-bold text-amber-800">
+          <p className="mt-2 text-md font-bold text-amber-800">
             {dashboard?.activeAdmissions || 0}
           </p>
         </div>
@@ -741,7 +741,7 @@ export const IPDWorkspace: React.FC = () => {
                 <button
                   type="submit"
                   disabled={admissionLoading}
-                  className="flex w-full items-center cursor-pointer justify-center gap-2 rounded-md bg-[#1a4b8c] px-5 py-2.5 text-[12px] font-bold uppercase tracking-wider text-white shadow-sm transition-colors hover:bg-[#143b6e] disabled:cursor-not-allowed disabled:opacity-60"
+                  className="flex w-full items-center cursor-pointer justify-center gap-2 rounded-md bg-[#1a4b8c] px-5 py-3 text-[10px] font-bold uppercase tracking-wider text-white shadow-sm transition-colors hover:bg-[#143b6e] disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {admissionLoading ? (
                     <>
@@ -750,7 +750,7 @@ export const IPDWorkspace: React.FC = () => {
                     </>
                   ) : (
                     <>
-                      <ClipboardPlus className="h-4 w-4" />
+                      <ClipboardPlus className="h-3.5 w-3.5" />
                       <span>Admit Patient</span>
                     </>
                   )}
@@ -919,7 +919,7 @@ export const IPDWorkspace: React.FC = () => {
             </select>
             <div className="absolute inset-y-0 right-2 flex items-center pointer-events-none text-slate-400">
               <svg
-                className="w-4 h-4"
+                className="w-3.5 h-3.5"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -971,9 +971,7 @@ export const IPDWorkspace: React.FC = () => {
                   <th className="w-50 px-4 py-3 whitespace-nowrap">
                     Admission Reason
                   </th>
-                  <th className="w-25 px-4 py-3 whitespace-nowrap">
-                    Status
-                  </th>
+                  <th className="w-25 px-4 py-3 whitespace-nowrap">Status</th>
                   <th className="w-35 px-4 py-3 whitespace-nowrap">
                     Admitted At
                   </th>
@@ -1084,17 +1082,23 @@ export const IPDWorkspace: React.FC = () => {
 
       {showWardModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/45 p-4 font-sans antialiased backdrop-blur-sm">
-          <div className="w-full max-w-lg overflow-hidden rounded-lg border border-slate-200/80 bg-white shadow-[0_20px_60px_rgba(15,23,42,0.18)]">
+          <div className="w-full max-w-md overflow-hidden rounded-lg border border-slate-200/80 bg-white shadow-[0_20px_60px_rgba(15,23,42,0.18)]">
             <div className="flex items-center justify-between border-b border-slate-200/60 bg-slate-50 px-5 py-4">
-              <div>
-                <h3 className="text-sm font-bold uppercase tracking-wide text-[#1a4b8c]">
-                  Create Inpatient <span className="text-[#029352]">Ward</span>
-                </h3>
+              <div className="flex items-center gap-2 text-[#1a4b8c]">
+                <div className="rounded-md bg-[#029352]/10 p-2 text-[#029352]">
+                  <Building2 className="h-5 w-5 shrink-0" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold uppercase tracking-normal text-[#1a4b8c]">
+                    Create Inpatient{" "}
+                    <span className="text-[#029352]">Ward</span>
+                  </h3>
 
-                <p className="mt-0.5 text-[10px] font-medium text-slate-400">
-                  Configure a ward and optionally add comma-separated bed
-                  numbers.
-                </p>
+                  <p className="mt-0.5 text-[10px] font-medium text-slate-400">
+                    Configure a ward and optionally add comma-separated bed
+                    numbers.
+                  </p>
+                </div>
               </div>
 
               <button
@@ -1111,7 +1115,7 @@ export const IPDWorkspace: React.FC = () => {
             <form onSubmit={handleCreateWard} className="space-y-4 p-5">
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <div>
-                  <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                  <label className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-slate-400">
                     Ward Name
                   </label>
 
@@ -1121,12 +1125,12 @@ export const IPDWorkspace: React.FC = () => {
                     value={wardName}
                     onChange={(event) => setWardName(event.target.value)}
                     placeholder="General Ward A"
-                    className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2.5 text-xs font-medium text-slate-700 outline-none placeholder:text-slate-300 focus:border-[#1a4b8c] focus:bg-white focus:ring-2 focus:ring-[#1a4b8c]/10"
+                    className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2.5 text-xs font-semibold text-slate-700 outline-none placeholder:text-slate-300 focus:border-[#1a4b8c] focus:bg-white focus:ring-2 focus:ring-[#1a4b8c]/10"
                   />
                 </div>
 
                 <div>
-                  <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                  <label className="mb-1 block text-[10px] font-semibold uppercase tracking-wide text-slate-400">
                     Ward Code
                   </label>
 
@@ -1136,35 +1140,52 @@ export const IPDWorkspace: React.FC = () => {
                     value={wardCode}
                     onChange={(event) => setWardCode(event.target.value)}
                     placeholder="GWA"
-                    className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2.5 text-xs font-medium uppercase text-slate-700 outline-none placeholder:text-slate-300 focus:border-[#1a4b8c] focus:bg-white focus:ring-2 focus:ring-[#1a4b8c]/10"
+                    className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2.5 text-xs font-semibold uppercase text-slate-700 outline-none placeholder:text-slate-300 focus:border-[#1a4b8c] focus:bg-white focus:ring-2 focus:ring-[#1a4b8c]/10"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <div>
-                  <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                  <label className="mb-1 block text-[10px] font-semibold uppercase tracking-wide text-slate-400">
                     Ward Type
                   </label>
 
-                  <select
-                    value={wardType}
-                    onChange={(event) => setWardType(event.target.value)}
-                    className="w-full cursor-pointer rounded-md border border-slate-200 bg-slate-50 px-3 py-2.5 text-xs font-bold uppercase text-slate-600 outline-none focus:border-[#1a4b8c] focus:bg-white focus:ring-2 focus:ring-[#1a4b8c]/10"
-                  >
-                    <option value="General">GENERAL</option>
-                    <option value="Private">PRIVATE</option>
-                    <option value="Semi-Private">SEMI-PRIVATE</option>
-                    <option value="ICU">ICU</option>
-                    <option value="Emergency">EMERGENCY</option>
-                    <option value="Maternity">MATERNITY</option>
-                    <option value="Pediatric">PEDIATRIC</option>
-                    <option value="Isolation">ISOLATION</option>
-                  </select>
+                  <div className="relative w-full">
+                    <select
+                      value={wardType}
+                      onChange={(event) => setWardType(event.target.value)}
+                      className="w-full cursor-pointer rounded-md border border-slate-200 bg-slate-50 pl-3 pr-10 py-2.5 text-[11px] font-bold uppercase text-slate-500 outline-none focus:border-[#1a4b8c] focus:bg-white focus:ring-2 focus:ring-[#1a4b8c]/10 appearance-none"
+                    >
+                      <option value="General">GENERAL</option>
+                      <option value="Private">PRIVATE</option>
+                      <option value="Semi-Private">SEMI-PRIVATE</option>
+                      <option value="ICU">ICU</option>
+                      <option value="Emergency">EMERGENCY</option>
+                      <option value="Maternity">MATERNITY</option>
+                      <option value="Pediatric">PEDIATRIC</option>
+                      <option value="Isolation">ISOLATION</option>
+                    </select>
+                    <div className="absolute inset-y-0 right-2 flex items-center pointer-events-none text-slate-400">
+                      <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2.5"
+                          d="M19 9l-7 7-7-7"
+                        />
+                      </svg>
+                    </div>
+                  </div>
                 </div>
 
                 <div>
-                  <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                  <label className="mb-1 block text-[10px] font-semibold uppercase tracking-wide text-slate-400">
                     Floor
                   </label>
 
@@ -1179,7 +1200,7 @@ export const IPDWorkspace: React.FC = () => {
               </div>
 
               <div>
-                <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                <label className="mb-1 block text-[10px] font-semibold uppercase tracking-wide text-slate-400">
                   Initial Bed Numbers
                 </label>
 
@@ -1188,7 +1209,7 @@ export const IPDWorkspace: React.FC = () => {
                   value={bedsInput}
                   onChange={(event) => setBedsInput(event.target.value)}
                   placeholder="A-01, A-02, A-03, A-04"
-                  className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2.5 text-xs font-medium text-slate-700 outline-none placeholder:text-slate-300 focus:border-[#1a4b8c] focus:bg-white focus:ring-2 focus:ring-[#1a4b8c]/10"
+                  className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2.5 text-xs font-semibold text-slate-700 outline-none placeholder:text-slate-300 focus:border-[#1a4b8c] focus:bg-white focus:ring-2 focus:ring-[#1a4b8c]/10"
                 />
 
                 <p className="mt-1 text-[10px] font-medium text-slate-400">

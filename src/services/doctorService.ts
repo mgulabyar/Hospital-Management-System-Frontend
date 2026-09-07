@@ -38,7 +38,6 @@ export const hmsDoctorServices = {
     const searchParams = new URLSearchParams();
 
     if (statusQuery) {
-      // Map appointment status to token status
       const mappedStatus = statusQuery
         .split(",")
         .map((status) => {
