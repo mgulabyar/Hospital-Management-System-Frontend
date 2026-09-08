@@ -1,4 +1,3 @@
-
 // /* eslint-disable react-hooks/set-state-in-effect */
 // /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -262,7 +261,8 @@ export const AdminDashboard: React.FC = () => {
       setError("");
 
       try {
-        const analyticsResponse = await hmsServices.billing.getDashboardAnalytics(selectedDate);
+        const analyticsResponse =
+          await hmsServices.billing.getDashboardAnalytics(selectedDate);
 
         if (analyticsResponse.success) {
           setMetrics(analyticsResponse.data || null);
@@ -270,7 +270,9 @@ export const AdminDashboard: React.FC = () => {
           setMetrics(null);
         }
       } catch (err: any) {
-        setError(err?.response?.data?.message || "Failed to fetch dashboard analytics");
+        setError(
+          err?.response?.data?.message || "Failed to fetch dashboard analytics",
+        );
       } finally {
         setLoading(false);
         setRefreshing(false);
@@ -350,7 +352,9 @@ export const AdminDashboard: React.FC = () => {
             disabled={refreshing}
             className="rounded-lg border border-slate-200 bg-white p-2.5 text-slate-400 transition-colors hover:bg-[#1a4b8c]/5 hover:text-[#1a4b8c] disabled:cursor-not-allowed disabled:opacity-50"
           >
-            <RefreshCw className={`h-5 w-5 ${refreshing ? "animate-spin" : ""}`} />
+            <RefreshCw
+              className={`h-5 w-5 ${refreshing ? "animate-spin" : ""}`}
+            />
           </button>
 
           <div className="shrink-0 rounded-lg border border-emerald-100 bg-[#029352]/10 p-2.5 text-[#029352]">
@@ -364,15 +368,21 @@ export const AdminDashboard: React.FC = () => {
           const Icon = stat.icon;
           const isGreen = stat.accent === "green";
           return (
-            <div key={stat.title} className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+            <div
+              key={stat.title}
+              className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm"
+            >
               <div className="flex items-center justify-between">
                 <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
                   {stat.title}
                 </p>
-                <Icon className={`h-4 w-4 ${isGreen ? "text-[#029352]" : "text-[#1a4b8c]"}`} />
+                <Icon
+                  className={`h-4 w-4 ${isGreen ? "text-[#029352]" : "text-[#1a4b8c]"}`}
+                />
               </div>
-              {/* Card numbers changed to standard Arial/sans, text-base (text-md size) and font-bold */}
-              <p className="mt-2 text-base font-bold text-slate-800 font-sans">{stat.value}</p>
+              <p className="mt-2 text-base font-bold text-slate-800 font-sans">
+                {stat.value}
+              </p>
             </div>
           );
         })}
@@ -403,7 +413,9 @@ export const AdminDashboard: React.FC = () => {
               key={item.label}
               className="flex items-center justify-between rounded-md border border-slate-100 bg-slate-50/60 p-3"
             >
-              <span className="text-xs font-semibold text-slate-600">{item.label}</span>
+              <span className="text-xs font-semibold text-slate-600">
+                {item.label}
+              </span>
               <span className="text-xs font-medium text-slate-800 font-sans">
                 {formatCurrency(item.value)}
               </span>
