@@ -206,17 +206,6 @@
 //                 <span className="text-xs font-semibold text-slate-500">
 //                   Actual Collected
 //                 </span>
-//               </div>
-//               <span className="font-mono text-sm font-semibold text-[#029352]">
-//                 {formatCurrency(revenue.collectedRevenue)}
-//               </span>
-//             </div>
-//           </div>
-//         </div>
-//       </div>
-//     </div>
-//   );
-// };
 
 /* eslint-disable react-hooks/set-state-in-effect */
 /* eslint-disable @typescript-eslint/no-explicit-any */
