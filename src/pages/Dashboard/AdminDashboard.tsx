@@ -404,7 +404,6 @@ export const AdminDashboard: React.FC = () => {
               className="flex items-center justify-between rounded-md border border-slate-100 bg-slate-50/60 p-3"
             >
               <span className="text-xs font-semibold text-slate-600">{item.label}</span>
-              {/* Removed font-mono, kept clean font-sans Arial look */}
               <span className="text-xs font-medium text-slate-800 font-sans">
                 {formatCurrency(item.value)}
               </span>
