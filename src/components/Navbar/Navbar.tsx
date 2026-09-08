@@ -93,20 +93,12 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
       >
         {user ? (
           <div className="flex items-center gap-2 sm:gap-3">
-            <div className="hidden max-w-40 text-right md:block">
-              <p className="truncate text-xs font-bold text-[#1a4b8c]">
-                {user.name}
-              </p>
-
-              <p className="mt-0.5 truncate text-[10px] font-medium text-slate-400">
-                {user.email}
-              </p>
-            </div>
+        
 
             <button
               type="button"
               onClick={toggleDropdown}
-              className="flex h-10 w-10 items-center justify-center rounded-full bg-[#029352] text-base font-semibold text-white shadow-sm transition-all duration-200 hover:bg-[#029352]/90 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-[#1a4b8c]/30 active:scale-95"
+              className="flex h-10 w-10 items-center justify-center rounded-full bg-[#029352] text-base font-semibold text-white shadow-sm transition-all duration-200 hover:bg-[#029352]/90 hover:shadow-md  active:scale-95"
               aria-label="Open user profile menu"
               aria-expanded={dropdownOpen}
             >
