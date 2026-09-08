@@ -419,7 +419,6 @@ export const AdminDashboard: React.FC = () => {
                   Invoice Gross Total
                 </span>
               </div>
-              {/* Removed font-mono, kept clean font-sans Arial look */}
               <span className="text-sm font-semibold text-[#1a4b8c] font-sans">
                 {formatCurrency(revenue.invoiceGrossTotal)}
               </span>
