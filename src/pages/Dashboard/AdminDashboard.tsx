@@ -1,4 +1,3 @@
-
 /* eslint-disable react-hooks/set-state-in-effect */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -6,13 +5,9 @@ import React, { useCallback, useEffect, useState } from "react";
 import {
   AlertTriangle,
   Building2,
-  CircleDollarSign,
-  Clock,
   DollarSign,
-  PackageCheck,
   RefreshCw,
   Stethoscope,
-  TestTube2,
   UserCheck,
   Users,
 } from "lucide-react";
@@ -86,7 +81,6 @@ export const AdminDashboard: React.FC = () => {
     );
   }
 
-  const dailyOps = metrics?.dailyOperations || {};
   const revenue = metrics?.revenueBreakdown || {};
 
   const statCards = [
@@ -157,51 +151,6 @@ export const AdminDashboard: React.FC = () => {
             </div>
           );
         })}
-      </div>
-
-      {/* Secondary Stats */}
-      <div className="mt-6 grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-4">
-        <div className="rounded-lg border border-slate-200/80 bg-slate-50 p-4 shadow-sm">
-          <div className="flex items-center justify-between">
-            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
-              Outstanding Balance
-            </p>
-            <CircleDollarSign className="h-4 w-4 text-slate-500" />
-          </div>
-          <p className="mt-2 text-md font-bold text-[#1a4b8c]">
-            {formatCurrency(metrics?.outstandingBalance)}
-          </p>
-        </div>
-
-        <div className="rounded-lg border border-slate-200/80 bg-slate-50 p-4 shadow-sm">
-          <div className="flex items-center justify-between">
-            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
-              Pending Visits
-            </p>
-            <Clock className="h-4 w-4 text-slate-500" />
-          </div>
-          <p className="mt-2 text-md font-bold text-[#1a4b8c]">{dailyOps.pendingVisits || 0}</p>
-        </div>
-
-        <div className="rounded-lg border border-slate-200/80 bg-slate-50 p-4 shadow-sm">
-          <div className="flex items-center justify-between">
-            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
-              Pending Lab Tests
-            </p>
-            <TestTube2 className="h-4 w-4 text-slate-500" />
-          </div>
-          <p className="mt-2 text-md font-bold text-[#1a4b8c]">{dailyOps.pendingLabTests || 0}</p>
-        </div>
-
-        <div className="rounded-lg border border-slate-200/80 bg-slate-50 p-4 shadow-sm">
-          <div className="flex items-center justify-between">
-            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
-              Low Stock Medicines
-            </p>
-            <PackageCheck className="h-4 w-4 text-slate-500" />
-          </div>
-          <p className="mt-2 text-md font-bold text-[#1a4b8c]">{dailyOps.lowStockMedicines || 0}</p>
-        </div>
       </div>
 
       {/* Revenue Breakdown */}
