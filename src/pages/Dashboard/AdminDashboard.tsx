@@ -158,54 +158,6 @@
 
 //       <div className="mt-6 rounded-lg border border-slate-200/80 bg-white p-5 shadow-sm">
 //         <div className="mb-4 flex items-center gap-2 border-b border-slate-100 pb-3">
-//           <div className="rounded-md bg-[#1a4b8c]/10 p-2 text-[#1a4b8c]">
-//             <DollarSign className="h-5 w-5" />
-//           </div>
-//           <div>
-//             <h3 className="text-sm font-bold uppercase text-[#1a4b8c]">
-//               Revenue <span className="text-[#029352]">Breakdown</span>
-//             </h3>
-//             <p className="mt-0.5 text-[10px] font-medium text-slate-400">
-//               All generated invoice charge categories
-//             </p>
-//           </div>
-//         </div>
-
-//         <div className="space-y-3">
-//           {[
-//             { label: "Consultation", value: revenue.consultationRevenue },
-//             { label: "Laboratory", value: revenue.labRevenue },
-//             { label: "Pharmacy", value: revenue.pharmacyRevenue },
-//           ].map((item) => (
-//             <div
-//               key={item.label}
-//               className="flex items-center justify-between rounded-md border border-slate-100 bg-slate-50/60 p-3"
-//             >
-//               <span className="text-xs font-semibold text-slate-600">{item.label}</span>
-//               <span className="font-mono text-xs font-medium text-slate-800">
-//                 {formatCurrency(item.value)}
-//               </span>
-//             </div>
-//           ))}
-
-//           <div className="mt-1 space-y-2.5 border-t border-slate-200 pt-4">
-//             <div className="flex items-center justify-between">
-//               <div className="flex items-center gap-2">
-//                 <span className="h-1.5 w-1.5 rounded-full bg-[#1a4b8c]" />
-//                 <span className="text-xs font-semibold text-slate-500">
-//                   Invoice Gross Total
-//                 </span>
-//               </div>
-//               <span className="font-mono text-sm font-semibold text-[#1a4b8c]">
-//                 {formatCurrency(revenue.invoiceGrossTotal)}
-//               </span>
-//             </div>
-//             <div className="flex items-center justify-between">
-//               <div className="flex items-center gap-2">
-//                 <span className="h-1.5 w-1.5 rounded-full bg-[#029352]" />
-//                 <span className="text-xs font-semibold text-slate-500">
-//                   Actual Collected
-//                 </span>
 
 /* eslint-disable react-hooks/set-state-in-effect */
 /* eslint-disable @typescript-eslint/no-explicit-any */
