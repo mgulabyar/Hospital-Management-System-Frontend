@@ -147,17 +147,6 @@
 //               <div className="flex items-center justify-between">
 //                 <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
 //                   {stat.title}
-//                 </p>
-//                 <Icon className={`h-4 w-4 ${isGreen ? "text-[#029352]" : "text-[#1a4b8c]"}`} />
-//               </div>
-//               <p className="mt-2 text-lg font-semibold text-slate-800">{stat.value}</p>
-//             </div>
-//           );
-//         })}
-//       </div>
-
-//       <div className="mt-6 rounded-lg border border-slate-200/80 bg-white p-5 shadow-sm">
-//         <div className="mb-4 flex items-center gap-2 border-b border-slate-100 pb-3">
 
 /* eslint-disable react-hooks/set-state-in-effect */
 /* eslint-disable @typescript-eslint/no-explicit-any */
