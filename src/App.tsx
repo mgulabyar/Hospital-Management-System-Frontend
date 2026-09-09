@@ -16,6 +16,8 @@ import { SecurityLogsWorkspace } from "./components/Security/SecurityLogsWorkspa
 import { StaffRegistry } from "./components/Staff/StaffRegistry";
 import { FinancialLedger } from "./components/FinancialLedger/FinancialLedger";
 import { IPDWorkspace } from "./components/IPD/IPDWorkspace";
+import { DepartmentManagement } from "./pages/Department/DepartmentManagement";
+import ReportsManagement from "./pages/Report/ReportsManagement";
 
 const roleTabAccess: Record<string, string[]> = {
   super_admin: [
@@ -27,7 +29,9 @@ const roleTabAccess: Record<string, string[]> = {
     "pharmacy",
     "billing",
     "financial_ledger",
+    "departments",
     "staff_crud",
+    "reports",
     "system_security",
     "ipd",
   ],
@@ -99,8 +103,6 @@ const MainAppContent: React.FC = () => {
     return <Login />;
   }
 
-  
-
   return (
     <div className="flex min-h-screen flex-col  bg-slate-50 font-sans antialiased">
       <TopNavbar
@@ -127,6 +129,8 @@ const MainAppContent: React.FC = () => {
 
           {activeTab === "doctor" && <DoctorWorkspace />}
 
+          {activeTab === "departments" && <DepartmentManagement />}
+
           {activeTab === "lab" && <LabWorkspace />}
 
           {activeTab === "pharmacy" && <PharmacyWorkspace />}
@@ -136,6 +140,8 @@ const MainAppContent: React.FC = () => {
           {activeTab === "financial_ledger" && <FinancialLedger />}
 
           {activeTab === "staff_crud" && <StaffRegistry />}
+
+          {activeTab === "reports" && <ReportsManagement />}
 
           {activeTab === "system_security" && <SecurityLogsWorkspace />}
 

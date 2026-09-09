@@ -12,6 +12,8 @@ import {
   UserRoundCheck,
   Users,
   X,
+  Building2,
+  BarChart3,
 } from "lucide-react";
 import { AuthContext } from "../../context/AuthContext";
 
@@ -47,7 +49,7 @@ export const MainSidebar: React.FC<MainSidebarProps> = ({
     },
     {
       id: "appointments",
-      name: "Appointments",
+      name: "Appointments Scheduler",
       icon: CalendarDays,
       allowedRoles: ["super_admin", "receptionist", "doctor"],
     },
@@ -56,6 +58,12 @@ export const MainSidebar: React.FC<MainSidebarProps> = ({
       name: "Doctor Workspace",
       icon: Stethoscope,
       allowedRoles: ["super_admin", "doctor"],
+    },
+    {
+      id: "departments",
+      name: "Manage Departments",
+      icon: Building2,
+      allowedRoles: ["super_admin"],
     },
     {
       id: "lab",
@@ -71,7 +79,7 @@ export const MainSidebar: React.FC<MainSidebarProps> = ({
     },
     {
       id: "billing",
-      name: "Billing Workspace",
+      name: "Billing & Invoicing",
       icon: Receipt,
       allowedRoles: ["super_admin", "accountant"],
     },
@@ -91,6 +99,12 @@ export const MainSidebar: React.FC<MainSidebarProps> = ({
       id: "staff_crud",
       name: "Manage Hospital Staff",
       icon: Users,
+      allowedRoles: ["super_admin"],
+    },
+    {
+      id: "reports",
+      name: "Reports Management",
+      icon: BarChart3,
       allowedRoles: ["super_admin"],
     },
     {

@@ -376,7 +376,7 @@ export const DoctorWorkspace: React.FC = () => {
             {successMsg ? (
               <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" />
             ) : (
-              <X className="mt-0.5 h-4 w-4 shrink-0" />
+              <X className="w-0" />
             )}
 
             <p className="pr-3 leading-relaxed">{successMsg || errorMsg}</p>
